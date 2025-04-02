@@ -44,6 +44,8 @@ fileInput.addEventListener('change', async (event: Event) => {
           // gizmo
           const positionGizmo = new BABYLON.PositionGizmo(utilLayer);
           positionGizmo.attachedMesh = meshes[0]
+          const rotationGizmo = new BABYLON.RotationGizmo(utilLayer);
+          rotationGizmo.attachedMesh = meshes[0]
 
           // remove button
           const button = document.createElement('button');
@@ -52,6 +54,7 @@ fileInput.addEventListener('change', async (event: Event) => {
           button.onclick = () => {            
             meshes[0].dispose();
             positionGizmo.dispose();
+            rotationGizmo.dispose();
             document.getElementById('interface')?.removeChild(button);
           };
           document.getElementById('interface')?.appendChild(button);
