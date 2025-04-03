@@ -13,6 +13,7 @@
     "vite": "^6.2.0"
   },
   "dependencies": {
+    "@microsoft/signalr": "^8.0.7",
     "babylonjs": "^7.54.0",
     "babylonjs-loaders": "^7.54.0"
   }

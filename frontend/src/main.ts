@@ -1,8 +1,11 @@
 import * as BABYLON from 'babylonjs';
 import {STLFileLoader} from 'babylonjs-loaders';
+
+import * as signalR from "@microsoft/signalr";
+
 BABYLON.SceneLoader.RegisterPlugin(new STLFileLoader());
 
-
+// Babylon Canvas and render engine
 const canvas = document.getElementById("renderCanvas") as HTMLCanvasElement;
 const engine = new BABYLON.Engine(canvas);
 
@@ -15,8 +18,11 @@ function createScene(){
 };
 
 const scene = createScene();
+
+// utility layer for gizmos
 const utilLayer = new BABYLON.UtilityLayerRenderer(scene);
 
+// input to upload files
 const fileInput = document.getElementById('fileInput') as HTMLInputElement;
 
 fileInput.addEventListener('change', async (event: Event) => {
@@ -66,7 +72,28 @@ fileInput.addEventListener('change', async (event: Event) => {
   }
 });
 
-
 engine.runRenderLoop(() => {
   scene.render();
 });
+
+const connection = new signalR.HubConnectionBuilder()
+  .withUrl("http://localhost:5000", {
+    skipNegotiation: true,
+    transport: signalR.HttpTransportType.WebSockets,
+    withCredentials: false
+  })
+  .configureLogging(signalR.LogLevel.Information)
+  .build();
+
+connection.start().then(() => console.log('connected'));
+
+// function checkConnection(){
+//   connection.invoke("check_connection", {"message": "hello backend"})
+// }
+
+// connection.on("successfull_communication", (data) => console.log(`message received: ${data.message}`));
+
+// const comCheckButton = document.getElementById("communicationCheckButton");
+// if (comCheckButton) {
+//   comCheckButton.onclick = () => {checkConnection()};
+// }

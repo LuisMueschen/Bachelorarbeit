@@ -6,7 +6,7 @@ class Serv(BaseHTTPRequestHandler):
 
     def do_GET(self):
         # Set the base directory to the /frontend folder
-        base_dir = os.path.join(os.path.dirname(__file__), '../frontend/dist')
+        base_dir = os.path.join(os.path.dirname(__file__), '../dist')
         
         if self.path == '/':
             self.path = '/index.html'
