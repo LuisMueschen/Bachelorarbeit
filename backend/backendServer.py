@@ -5,15 +5,10 @@ import numpy as np
 from flask import Flask
 from flask_socketio import SocketIO
 from flask_cors import CORS
-import gevent
-from gevent import monkey
 
-monkey.patch_all()
-
-# Flask-Server mit SignalR (SocketIO) einrichten
 app = Flask(__name__)
-CORS(app,  supports_credentials=True)
-socketio = SocketIO(app, cors_allowed_origins="http://localhost:5173", async_mode="gevent")
+socketio = SocketIO(app, cors_allowed_origins="*")
+CORS(app)
 
 def load_mesh_from_base64(base64_string):
     # Lädt ein Mesh aus einem Base64-kodierten String.
@@ -46,7 +41,7 @@ def mesh_to_base64(mesh):
 
 @socketio.on("check_connection")
 def check_connection(data):
-    print("message received" + data["message"])
+    print("message received: " + data["message"])
     socketio.emit("successfull_communication", {"message": "hello client"})
 
 @socketio.on("transform_mesh")
@@ -72,5 +67,5 @@ def handle_transform(data):
         socketio.emit("transformation_error", {"error": str(e)})
 
 if __name__ == "__main__":
-    print("Starte 3D-Transformationsserver...")
+    print("Starte Server")
     socketio.run(app, host="0.0.0.0", port=5000, debug=True, )
