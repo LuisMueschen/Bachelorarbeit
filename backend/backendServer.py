@@ -53,17 +53,17 @@ def handle_transform(data):
     # rotation = tuple(data["rotation"])
     # scale = data["scale"]
 
-    # try:
-    #     # 3D-Modell laden und transformieren
-    #     mesh = load_mesh_from_base64(base64_mesh)
-    #     transformed_mesh = transform_mesh(mesh, translation, rotation, scale)
-    #     result_base64 = mesh_to_base64(transformed_mesh)
+    try:
+        # 3D-Modell laden und transformieren
+        mesh = load_mesh_from_base64(base64_mesh)
+        transformed_mesh = transform_mesh(mesh, (1, 1, 1), (1, 1, 1), (3, 1, 1))
+        result_base64 = mesh_to_base64(transformed_mesh)
 
-    #     # Ergebnis zurücksenden
-    #     socketio.emit("transformed_mesh", {"mesh": result_base64})
-    # except Exception as e:
-    #     print("Fehler bei der Transformation:", str(e))
-    #     socketio.emit("transformation_error", {"error": str(e)})
+        # Ergebnis zurücksenden
+        socketio.emit("transformed_mesh", {"mesh": result_base64})
+    except Exception as e:
+        print("Fehler bei der Transformation:", str(e))
+        socketio.emit("transformation_error", {"error": str(e)})
 
 if __name__ == "__main__":
     print("Starte Server")

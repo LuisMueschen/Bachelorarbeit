@@ -18,6 +18,10 @@ function createScene() {
 
 const scene = createScene();
 
+engine.runRenderLoop(() => {
+  scene.render();
+});
+
 // utility layer for gizmos
 const utilLayer = new BABYLON.UtilityLayerRenderer(scene);
 
@@ -30,8 +34,6 @@ fileInput.addEventListener('change', async (event: Event) => {
   if (target.files && target.files.length > 0) {
     const file = target.files[0];
     const fileReader = new FileReader();
-
-    console.log(file);
 
     fileReader.onload = (e) => {
       if (e.target && e.target.result) {
@@ -82,24 +84,6 @@ fileInput.addEventListener('change', async (event: Event) => {
   }
 });
 
-engine.runRenderLoop(() => {
-  scene.render();
-});
-
-const socket = io("http://localhost:5000");
-
-// socket.on("connect", () => {
-//   console.log("Socket.IO connection established");
-// });
-
-// socket.on("disconnect", () => {
-//   console.log("Socket.IO connection closed");
-// });
-
-socket.on("successfull_communication", (data) => {
-  console.log(`message received: ${data.message}`);
-});
-
 function checkConnection() {
   socket.emit("check_connection", { message: "hello backend" });
 }
@@ -114,6 +98,24 @@ function uploadFile(file: File){
   };
   reader.readAsDataURL(file);
 };
+
+const socket = io("http://localhost:5000");
+
+socket.on("connect", () => {
+  console.log("Socket.IO connection established");
+});
+
+socket.on("disconnect", () => {
+  console.log("Socket.IO connection closed");
+});
+
+socket.on("successfull_communication", (data) => {
+  console.log(`message received: ${data.message}`);
+});
+
+socket.on("transformed_mesh", (data) => {
+  console.log(`Mesh received ${data.mesh}`);
+});
 
 const comCheckButton = document.getElementById("communicationCheckButton");
 if (comCheckButton) {
