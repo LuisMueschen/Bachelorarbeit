@@ -52,17 +52,28 @@ fileInput.addEventListener('change', async (event: Event) => {
           const rotationGizmo = new BABYLON.RotationGizmo(utilLayer);
           rotationGizmo.attachedMesh = meshes[0]
 
+          // div for each object
+          const objectDiv = document.createElement('div');
+          objectDiv.id = 'objectDiv';
+          document.getElementById('interface')?.appendChild(objectDiv);
+
           // remove button
-          const button = document.createElement('button');
-          button.name = file.name;
-          button.textContent = `${file.name} löschen`;
-          button.onclick = () => {
+          const deleteButton = document.createElement('button');
+          deleteButton.name = file.name;
+          deleteButton.textContent = `${file.name} löschen`;
+          deleteButton.onclick = () => {
             meshes[0].dispose();
             positionGizmo.dispose();
             rotationGizmo.dispose();
-            document.getElementById('interface')?.removeChild(button);
+            document.getElementById('interface')?.removeChild(objectDiv);
           };
-          document.getElementById('interface')?.appendChild(button);
+          document.getElementById('objectDiv')?.appendChild(deleteButton);
+
+          // upload button
+          const uploadButton = document.createElement('button');
+          uploadButton.textContent = 'Hochladen';
+          uploadButton.onclick = () => {uploadFile(file)};
+          document.getElementById("objectDiv")?.appendChild(uploadButton);
         }, undefined, undefined, ".stl");
       }
     };
@@ -77,13 +88,13 @@ engine.runRenderLoop(() => {
 
 const socket = io("http://localhost:5000");
 
-socket.on("connect", () => {
-  console.log("Socket.IO connection established");
-});
+// socket.on("connect", () => {
+//   console.log("Socket.IO connection established");
+// });
 
-socket.on("disconnect", () => {
-  console.log("Socket.IO connection closed");
-});
+// socket.on("disconnect", () => {
+//   console.log("Socket.IO connection closed");
+// });
 
 socket.on("successfull_communication", (data) => {
   console.log(`message received: ${data.message}`);
@@ -92,6 +103,17 @@ socket.on("successfull_communication", (data) => {
 function checkConnection() {
   socket.emit("check_connection", { message: "hello backend" });
 }
+
+function uploadFile(file: File){
+  const reader = new FileReader();
+  reader.onload = () => {
+    if(reader.result){
+      const base64String = (reader.result as string).split(",")[1];
+      socket.emit("transform_mesh", {data: base64String});
+    };
+  };
+  reader.readAsDataURL(file);
+};
 
 const comCheckButton = document.getElementById("communicationCheckButton");
 if (comCheckButton) {

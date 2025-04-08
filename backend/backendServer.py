@@ -47,25 +47,24 @@ def check_connection(data):
 @socketio.on("transform_mesh")
 def handle_transform(data):
     # Empfängt Mesh-Daten vom Frontend, transformiert das Modell und sendet es zurück.
-    base64_mesh = data["mesh"]
-    translation = tuple(data["translation"])
-    rotation = tuple(data["rotation"])
-    scale = data["scale"]
+    base64_mesh = data["data"]
 
-    print(f"Erhalte Mesh-Transformation: Translation={translation}, Rotation={rotation}, Scale={scale}")
+    # translation = tuple(data["translation"])
+    # rotation = tuple(data["rotation"])
+    # scale = data["scale"]
 
-    try:
-        # 3D-Modell laden und transformieren
-        mesh = load_mesh_from_base64(base64_mesh)
-        transformed_mesh = transform_mesh(mesh, translation, rotation, scale)
-        result_base64 = mesh_to_base64(transformed_mesh)
+    # try:
+    #     # 3D-Modell laden und transformieren
+    #     mesh = load_mesh_from_base64(base64_mesh)
+    #     transformed_mesh = transform_mesh(mesh, translation, rotation, scale)
+    #     result_base64 = mesh_to_base64(transformed_mesh)
 
-        # Ergebnis zurücksenden
-        socketio.emit("transformed_mesh", {"mesh": result_base64})
-    except Exception as e:
-        print("Fehler bei der Transformation:", str(e))
-        socketio.emit("transformation_error", {"error": str(e)})
+    #     # Ergebnis zurücksenden
+    #     socketio.emit("transformed_mesh", {"mesh": result_base64})
+    # except Exception as e:
+    #     print("Fehler bei der Transformation:", str(e))
+    #     socketio.emit("transformation_error", {"error": str(e)})
 
 if __name__ == "__main__":
     print("Starte Server")
-    socketio.run(app, host="0.0.0.0", port=5000, debug=True, )
+    socketio.run(app, host="0.0.0.0", port=5000, debug=True)
