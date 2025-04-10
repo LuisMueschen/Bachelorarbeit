@@ -31,9 +31,9 @@ function uploadFile(file: File){
 
 function base64ToSTL(base64: string): File {
   // Ensure the base64 string is properly formatted
-  // const base64Data = base64.includes(",") ? base64.split(",")[1] : base64;
+  const base64Data = base64.includes(",") ? base64.split(",")[1] : base64;
 
-  const byteString = atob(base64);
+  const byteString = atob(base64Data);
   const ab = new ArrayBuffer(byteString.length);
   const ia = new Uint8Array(ab);
 
@@ -55,8 +55,6 @@ function addMeshToScene(file: File){
       const url = URL.createObjectURL(blob);
 
       BABYLON.SceneLoader.ImportMesh(file.name, url, '', scene, (meshes) => {
-        console.log('geladen');
-
         // scaling
         meshes[0].scaling.scaleInPlace(0.1);
         meshes[0].position.y = -1;
@@ -76,19 +74,21 @@ function addMeshToScene(file: File){
         const deleteButton = document.createElement('button');
         deleteButton.name = file.name;
         deleteButton.textContent = `${file.name} löschen`;
+        deleteButton.className = 'deleteBtn';
         deleteButton.onclick = () => {
           meshes[0].dispose();
           positionGizmo.dispose();
           rotationGizmo.dispose();
           document.getElementById('interface')?.removeChild(objectDiv);
         };
-        document.getElementById('objectDiv')?.appendChild(deleteButton);
+        objectDiv.appendChild(deleteButton);
 
         // upload button
         const uploadButton = document.createElement('button');
-        uploadButton.textContent = 'Hochladen';
+        uploadButton.textContent = `${file.name} Hochladen`;
+        uploadButton.className = 'uploadBtn';
         uploadButton.onclick = () => {uploadFile(file)};
-        document.getElementById("objectDiv")?.appendChild(uploadButton);
+        objectDiv.appendChild(uploadButton);
       }, undefined, undefined, ".stl");
     }
   };
@@ -135,7 +135,6 @@ socket.on("successfull_communication", (data) => {
 
 socket.on("transformed_mesh", (data) => {
   const file = base64ToSTL(data.mesh)
-  console.log(`File received ${file}`);
   addMeshToScene(file)
 });
 

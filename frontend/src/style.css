@@ -13,14 +13,65 @@ body {
   grid-template-rows: 100%;
 }
 
-#interface {
-  grid-column: 1;
-  display: flex;
-  flex-direction: column;
-}
-
 #renderCanvas {
   grid-column: 2;
   height: 100%;
   width: 100%;
+}
+
+#interface {
+  grid-column: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: rgb(68, 70, 73);
+  border-right: 5px solid black;
+  align-items: flex-start;
+}
+
+#objectDiv {
+  display: flex;
+  flex-direction: row;
+}
+
+#communicationCheckButton{
+  background-color: rgb(194, 194, 194);
+  margin: 5px;
+  border-radius: 7px;
+  border: 1px solid rgb(58, 58, 58);
+  font-size: 12pt;
+  display: none;
+}
+
+#inputLabel{
+  background-color: rgb(135, 135, 135);
+  margin: 5px;
+  border-radius: 7px;
+  border: 1px solid rgb(58, 58, 58);
+  font-size: 12pt;
+  padding: 5px;
+}
+
+.deleteBtn {
+  background-color: rgb(185, 71, 71);
+  margin: 5px;
+  border-radius: 7px;
+  border: 1px solid rgb(68, 54, 54);
+  font-size: 11pt;
+}
+
+.uploadBtn {
+  background-color: rgb(117, 117, 117);
+  margin: 5px;
+  margin-left: 0;
+  border-radius: 7px;
+  border: 1px solid rgb(64, 64, 64);
+  font-size: 11pt;
+}
+
+#fileInput {
+  display: none;
+}
+
+#inputLabel {
+  font-family: Arial, sans-serif;
 }
