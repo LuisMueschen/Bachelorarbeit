@@ -1,6 +1,7 @@
 import * as BABYLON from 'babylonjs';
 import { STLFileLoader } from 'babylonjs-loaders';
-import { io } from "socket.io-client";
+// import { io } from "socket.io-client";
+import * as signalR from "@microsoft/signalr";
 
 BABYLON.SceneLoader.RegisterPlugin(new STLFileLoader());
 
@@ -15,7 +16,8 @@ function createScene() {
 };
 
 function checkConnection() {
-  socket.emit("check_connection", { message: "hello backend" });
+  // socket.emit("check_connection", { message: "hello backend" });
+  connection.invoke('SendToBackend', 'Hello world!')
 }
 
 function uploadFile(file: File){
@@ -23,7 +25,8 @@ function uploadFile(file: File){
   reader.onload = () => {
     if(reader.result){
       const base64String = (reader.result as string).split(",")[1];
-      socket.emit("transform_mesh", {data: base64String});
+      // socket.emit("transform_mesh", {data: base64String});
+      connection.invoke('transform_mesh', {data: base64String});
     };
   };
   reader.readAsDataURL(file);
@@ -119,8 +122,15 @@ const engine = new BABYLON.Engine(canvas);
 const scene = createScene();
 const utilLayer = new BABYLON.UtilityLayerRenderer(scene); // utility layer for gizmos
 const fileInput = document.getElementById('fileInput') as HTMLInputElement; // input to upload files
-const socket = io("http://localhost:5000");
+// const socket = io("http://localhost:5000");
 const comCheckButton = document.getElementById("communicationCheckButton");
+
+
+const connection = new signalR.HubConnectionBuilder()
+    .withUrl("http://localhost:5500/myhub")
+    .build();
+
+await connection.start();
 
  // rest //
 
@@ -137,19 +147,36 @@ fileInput.addEventListener('change', async (event: Event) => {
   }
 });
 
-socket.on("connect", () => {
-  console.log("Socket.IO connection established");
+// socket.on("connect", () => {
+//   console.log("Socket.IO connection established");
+// });
+
+// socket.on("disconnect", () => {
+//   console.log("Socket.IO connection closed");
+// });
+
+// socket.on("successfull_communication", (data) => {
+//   console.log(`message received: ${data.message}`);
+// });
+
+// socket.on("transformed_mesh", (data) => {
+//   const file = base64ToSTL(data.mesh)
+//   addMeshToScene(file)
+// });
+
+connection.on("connect", () => {
+  console.log("signalR connection established");
 });
 
-socket.on("disconnect", () => {
-  console.log("Socket.IO connection closed");
+connection.on("disconnect", () => {
+  console.log("signalR connection closed");
 });
 
-socket.on("successfull_communication", (data) => {
+connection.on("successfull_communication", (data) => {
   console.log(`message received: ${data.message}`);
 });
 
-socket.on("transformed_mesh", (data) => {
+connection.on("transformed_mesh", (data) => {
   const file = base64ToSTL(data.mesh)
   addMeshToScene(file)
 });

@@ -39,7 +39,7 @@ body {
   border-radius: 7px;
   border: 1px solid rgb(58, 58, 58);
   font-size: 12pt;
-  display: none;
+  /* display: none; */
 }
 
 #inputLabel{
@@ -49,6 +49,18 @@ body {
   border: 1px solid rgb(58, 58, 58);
   font-size: 12pt;
   padding: 5px;
+  font-family: Arial, sans-serif;
+}
+
+#fileInput {
+  display: none;
+}
+
+button {
+  margin: 5px;
+  border-radius: 7px;
+  border: 1px solid black;
+  font-size: 11pt;
 }
 
 .deleteBtn {
@@ -66,12 +78,4 @@ body {
   border-radius: 7px;
   border: 1px solid rgb(64, 64, 64);
   font-size: 11pt;
-}
-
-#fileInput {
-  display: none;
-}
-
-#inputLabel {
-  font-family: Arial, sans-serif;
 }
