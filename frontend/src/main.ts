@@ -64,13 +64,29 @@ function addMeshToScene(file: File){
         positionGizmo.attachedMesh = meshes[0]
         const rotationGizmo = new BABYLON.RotationGizmo(utilLayer);
         rotationGizmo.attachedMesh = meshes[0]
-
+        
         // div for each object
         const objectDiv = document.createElement('div');
         objectDiv.id = 'objectDiv';
         document.getElementById('interface')?.appendChild(objectDiv);
-
-        // remove button
+        
+        // gizmo button
+        const gizmoButton = document.createElement('button');
+        gizmoButton.textContent = 'toggle gizmo';
+        gizmoButton.className = 'gizmoBtn';
+        gizmoButton.onclick = () => {
+          if (rotationGizmo.attachedMesh && positionGizmo.attachedMesh){
+            rotationGizmo.attachedMesh = null;
+            positionGizmo.attachedMesh = null;
+          }
+          else {
+            rotationGizmo.attachedMesh = meshes[0];
+            positionGizmo.attachedMesh = meshes[0];
+          }
+        };
+        objectDiv.appendChild(gizmoButton);
+        
+         // remove button
         const deleteButton = document.createElement('button');
         deleteButton.name = file.name;
         deleteButton.textContent = `${file.name} löschen`;
