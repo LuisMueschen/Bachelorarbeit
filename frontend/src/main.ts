@@ -17,7 +17,7 @@ function createScene() {
 
 function checkConnection() {
   // socket.emit("check_connection", { message: "hello backend" });
-  connection.invoke('SendToBackend', 'Hello world!')
+  connection.invoke('SendToBackend', 'Hello Backend!')
 }
 
 function uploadFile(file: File){
@@ -164,16 +164,8 @@ fileInput.addEventListener('change', async (event: Event) => {
 //   addMeshToScene(file)
 // });
 
-connection.on("connect", () => {
-  console.log("signalR connection established");
-});
-
-connection.on("disconnect", () => {
-  console.log("signalR connection closed");
-});
-
-connection.on("successfull_communication", (data) => {
-  console.log(`message received: ${data.message}`);
+connection.on("ReceiveMessage", (data) => {
+  console.log(`message received: ${data}`);
 });
 
 connection.on("transformed_mesh", (data) => {

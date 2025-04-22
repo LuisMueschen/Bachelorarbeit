@@ -3,12 +3,14 @@ import base64
 import trimesh
 import numpy as np
 from flask import Flask
-from flask_socketio import SocketIO
+# from flask_socketio import SocketIO
 from flask_cors import CORS
+from signalrcore.hub_connection_builder import HubConnectionBuilder
 
 app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins="*")
+# socketio = SocketIO(app, cors_allowed_origins="*")
 CORS(app)
+hub_connection = HubConnectionBuilder().with_url('http://localhost:5500/myhub').build()
 
 def load_mesh_from_base64(base64_string):
     # Lädt ein Mesh aus einem Base64-kodierten String.
@@ -39,12 +41,15 @@ def mesh_to_base64(mesh):
     mesh.export(buffer, file_type="stl")  # Dateiformat anpassen
     return base64.b64encode(buffer.getvalue()).decode()
 
-@socketio.on("check_connection")
-def check_connection(data):
-    print("message received: " + data["message"])
-    socketio.emit("successfull_communication", {"message": "hello client"})
+# @socketio.on("check_connection")
+def check_connection(args):
+    print("message received: " + args[0])
+    # socketio.emit("successfull_communication", {"message": "hello client"})
+    hub_connection.send("SendToFrontend", ["Hello Frontend!"])
 
-@socketio.on("transform_mesh")
+hub_connection.on('CheckConnection', check_connection)
+
+# @socketio.on("transform_mesh")
 def handle_transform(data):
     # Empfängt Mesh-Daten vom Frontend, transformiert das Modell und sendet es zurück.
     base64_mesh = data["data"]
@@ -60,11 +65,20 @@ def handle_transform(data):
         result_base64 = mesh_to_base64(transformed_mesh)
 
         # Ergebnis zurücksenden
-        socketio.emit("transformed_mesh", {"mesh": result_base64})
+        # socketio.emit("transformed_mesh", {"mesh": result_base64})
     except Exception as e:
         print("Fehler bei der Transformation:", str(e))
-        socketio.emit("transformation_error", {"error": str(e)})
+        # socketio.emit("transformation_error", {"error": str(e)})
+
+hub_connection.start()
 
 if __name__ == "__main__":
     print("Starte Server")
-    socketio.run(app, host="0.0.0.0", port=5000, debug=True)
+    # socketio.run(app, host="0.0.0.0", port=5000, debug=True)
+
+    import time
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        hub_connection.stop()

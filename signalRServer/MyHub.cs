@@ -2,14 +2,15 @@ using Microsoft.AspNetCore.SignalR;
 
 public class MyHub : Hub
 {
-    public async Task SendToBackend(string message)
+    public async Task SendToBackend(string payload)
     {
-        Console.WriteLine($"Vom Frontend empfangen: {message}");
-        // Hier könntest du das an dein Python-Backend weiterleiten
+        Console.WriteLine($"Vom Frontend empfangen: {payload}");
+        await Clients.All.SendAsync("CheckConnection", payload);
     }
 
-    public async Task SendToFrontend(string connectionId, string message)
+    public async Task SendToFrontend(string payload)
     {
-        await Clients.Client(connectionId).SendAsync("ReceiveMessage", message);
+        Console.WriteLine($"Vom Backend empfangen: {payload}");
+        await Clients.All.SendAsync("ReceiveMessage", payload);
     }
 }
