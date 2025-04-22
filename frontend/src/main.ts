@@ -26,13 +26,14 @@ function uploadFile(file: File){
     if(reader.result){
       const base64String = (reader.result as string).split(",")[1];
       // socket.emit("transform_mesh", {data: base64String});
-      connection.invoke('transform_mesh', {data: base64String});
+      connection.invoke('SendMeshToBackend', [base64String, file.name]);      
+      // connection.invoke('SendToBackend', 'Hello Backend!')
     };
   };
   reader.readAsDataURL(file);
 };
 
-function base64ToSTL(base64: string): File {
+function base64ToSTL(base64: string, fileName: string): File {
   // Ensure the base64 string is properly formatted
   const base64Data = base64.includes(",") ? base64.split(",")[1] : base64;
 
@@ -45,7 +46,7 @@ function base64ToSTL(base64: string): File {
   }
 
   const blob = new Blob([ab], { type: 'model/stl' });
-  return new File([blob], '', { type: 'model/stl' });
+  return new File([blob], fileName, { type: 'model/stl' });
 }
 
 function addMeshToScene(file: File){
@@ -168,8 +169,8 @@ connection.on("ReceiveMessage", (data) => {
   console.log(`message received: ${data}`);
 });
 
-connection.on("transformed_mesh", (data) => {
-  const file = base64ToSTL(data.mesh)
+connection.on("TransformedMesh", (data) => {
+  const file = base64ToSTL(data[0], data[1])
   addMeshToScene(file)
 });
 

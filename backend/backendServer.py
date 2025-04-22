@@ -47,12 +47,12 @@ def check_connection(args):
     # socketio.emit("successfull_communication", {"message": "hello client"})
     hub_connection.send("SendToFrontend", ["Hello Frontend!"])
 
-hub_connection.on('CheckConnection', check_connection)
-
 # @socketio.on("transform_mesh")
 def handle_transform(data):
     # Empfängt Mesh-Daten vom Frontend, transformiert das Modell und sendet es zurück.
-    base64_mesh = data["data"]
+    base64_mesh = data[0]
+    file_name = data[1]
+    print(file_name)
 
     # translation = tuple(data["translation"])
     # rotation = tuple(data["rotation"])
@@ -66,10 +66,13 @@ def handle_transform(data):
 
         # Ergebnis zurücksenden
         # socketio.emit("transformed_mesh", {"mesh": result_base64})
+        hub_connection.send("SendMeshToFrontend", [result_base64, file_name])
     except Exception as e:
         print("Fehler bei der Transformation:", str(e))
         # socketio.emit("transformation_error", {"error": str(e)})
 
+hub_connection.on('CheckConnection', check_connection)
+hub_connection.on('TransformMesh', handle_transform)
 hub_connection.start()
 
 if __name__ == "__main__":
