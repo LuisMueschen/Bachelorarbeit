@@ -14,15 +14,9 @@ public class MyHub : Hub
         await Clients.All.SendAsync("ReceiveMessage", payload);
     }
 
-    public async Task SendMeshToBackend(string meshAsBase64, string fileName)
+    public async Task NotifyBackendAboutFileUpload(string filename)
     {
-        Console.WriteLine("sending mesh to backendd");
-        await Clients.All.SendAsync("TransformMesh", meshAsBase64, fileName);
-    }
-
-    public async Task SendMeshToFrontend(string meshAsBase64, string fileName)
-    {
-        Console.WriteLine("Sending Transformed Mesh to Frontend");
-        await Clients.All.SendAsync("TransformedMesh", meshAsBase64, fileName);
+        Console.WriteLine("Datei wurde hochgeladen" + filename);
+        await Clients.All.SendAsync("FileUploaded", filename);
     }
 }

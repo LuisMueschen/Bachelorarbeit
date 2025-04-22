@@ -21,16 +21,18 @@ function checkConnection() {
 }
 
 function uploadFile(file: File){
-  const reader = new FileReader();
-  reader.onload = () => {
-    if(reader.result){
-      const base64String = (reader.result as string).split(",")[1];
-      // socket.emit("transform_mesh", {data: base64String});
-      connection.invoke('SendMeshToBackend', [base64String, file.name]);      
-      // connection.invoke('SendToBackend', 'Hello Backend!')
-    };
-  };
-  reader.readAsDataURL(file);
+  const formData = new FormData();
+  formData.append('file', file);
+
+  fetch("http://localhost:5000/upload", {
+    method: "POST",
+    body: formData
+  })
+  .then(() => {
+    console.log(file.name, 'hochgeladen');
+    connection.invoke('NotifyBackendAboutFileUpload', file.name)
+  })
+  .catch((err) => console.log("Fehler beim Upload:", err));
 };
 
 function base64ToSTL(base64: string, fileName: string): File {
@@ -124,8 +126,6 @@ const scene = createScene();
 const utilLayer = new BABYLON.UtilityLayerRenderer(scene); // utility layer for gizmos
 const fileInput = document.getElementById('fileInput') as HTMLInputElement; // input to upload files
 // const socket = io("http://localhost:5000");
-const comCheckButton = document.getElementById("communicationCheckButton");
-
 
 const connection = new signalR.HubConnectionBuilder()
     .withUrl("http://localhost:5500/myhub")
@@ -174,6 +174,8 @@ connection.on("TransformedMesh", (data) => {
   addMeshToScene(file)
 });
 
+
+const comCheckButton = document.getElementById("communicationCheckButton");
 if (comCheckButton) {
   comCheckButton.onclick = () => { checkConnection(); };
 }
