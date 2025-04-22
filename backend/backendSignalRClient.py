@@ -40,8 +40,7 @@ def check_connection(args):
 
 def handle_transform(data):
     # Empfängt Mesh-Daten vom Frontend, transformiert das Modell und sendet es zurück.
-    base64_mesh = data[0]
-    file_name = data[1]
+    file_name = data[0]
     print(file_name)
 
     # translation = tuple(data["translation"])
@@ -50,17 +49,20 @@ def handle_transform(data):
 
     try:
         # 3D-Modell laden und transformieren
-        mesh = load_mesh_from_base64(base64_mesh)
-        transformed_mesh = transform_mesh(mesh, (1, 1, 1), (1, 1, 1), (3, 1, 1))
-        result_base64 = mesh_to_base64(transformed_mesh)
+        with open(f"uploads/{file_name}", "rb") as file:
+            mesh = trimesh.load(io.BytesIO(file.read()), file_type="stl")
+            transformed_mesh = transform_mesh(mesh, (1, 1, 1), (1, 1, 1), (3, 1, 1))
 
+        with open(f"uploads/{file_name}", "wb") as file:
+            file.write(transformed_mesh.export(file_type='stl'))
+            
         # Ergebnis zurücksenden
-        hub_connection.send("SendMeshToFrontend", [result_base64, file_name])
+        hub_connection.send("NotifyFrontendAboutManipulatedMesh", [file_name])
     except Exception as e:
         print("Fehler bei der Transformation:", str(e))
 
 hub_connection.on('CheckConnection', check_connection)
-hub_connection.on('TransformMesh', handle_transform)
+hub_connection.on('FileUploaded', handle_transform)
 hub_connection.start()
 
 import time

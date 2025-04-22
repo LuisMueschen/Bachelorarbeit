@@ -19,4 +19,10 @@ public class MyHub : Hub
         Console.WriteLine("Datei wurde hochgeladen" + filename);
         await Clients.All.SendAsync("FileUploaded", filename);
     }
+
+    public async Task NotifyFrontendAboutManipulatedMesh(string filename)
+    {
+        Console.WriteLine("Datei wurde Bearbeitet" + filename);
+        
+    }
 }

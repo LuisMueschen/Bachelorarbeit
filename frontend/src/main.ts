@@ -1,6 +1,5 @@
 import * as BABYLON from 'babylonjs';
 import { STLFileLoader } from 'babylonjs-loaders';
-// import { io } from "socket.io-client";
 import * as signalR from "@microsoft/signalr";
 
 BABYLON.SceneLoader.RegisterPlugin(new STLFileLoader());
@@ -34,22 +33,6 @@ function uploadFile(file: File){
   })
   .catch((err) => console.log("Fehler beim Upload:", err));
 };
-
-function base64ToSTL(base64: string, fileName: string): File {
-  // Ensure the base64 string is properly formatted
-  const base64Data = base64.includes(",") ? base64.split(",")[1] : base64;
-
-  const byteString = atob(base64Data);
-  const ab = new ArrayBuffer(byteString.length);
-  const ia = new Uint8Array(ab);
-
-  for (let i = 0; i < byteString.length; i++) {
-    ia[i] = byteString.charCodeAt(i);
-  }
-
-  const blob = new Blob([ab], { type: 'model/stl' });
-  return new File([blob], fileName, { type: 'model/stl' });
-}
 
 function addMeshToScene(file: File){
   const fileReader = new FileReader();
@@ -125,7 +108,6 @@ const engine = new BABYLON.Engine(canvas);
 const scene = createScene();
 const utilLayer = new BABYLON.UtilityLayerRenderer(scene); // utility layer for gizmos
 const fileInput = document.getElementById('fileInput') as HTMLInputElement; // input to upload files
-// const socket = io("http://localhost:5000");
 
 const connection = new signalR.HubConnectionBuilder()
     .withUrl("http://localhost:5500/myhub")
@@ -148,30 +130,13 @@ fileInput.addEventListener('change', async (event: Event) => {
   }
 });
 
-// socket.on("connect", () => {
-//   console.log("Socket.IO connection established");
-// });
-
-// socket.on("disconnect", () => {
-//   console.log("Socket.IO connection closed");
-// });
-
-// socket.on("successfull_communication", (data) => {
-//   console.log(`message received: ${data.message}`);
-// });
-
-// socket.on("transformed_mesh", (data) => {
-//   const file = base64ToSTL(data.mesh)
-//   addMeshToScene(file)
-// });
-
 connection.on("ReceiveMessage", (data) => {
   console.log(`message received: ${data}`);
 });
 
 connection.on("TransformedMesh", (data) => {
-  const file = base64ToSTL(data[0], data[1])
-  addMeshToScene(file)
+  
+  // addMeshToScene(file)
 });
 
 
