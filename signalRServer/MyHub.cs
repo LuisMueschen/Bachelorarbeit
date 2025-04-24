@@ -10,6 +10,9 @@ public class MyHub : Hub
         Console.WriteLine($"Client verbunden: {clientID}");
         return Task.CompletedTask;
     }
+    public async Task Ping(){
+        await Clients.Caller.SendAsync("Connected");
+    }
     public async Task SendToBackend(string payload)
     {
         Console.WriteLine($"Vom Frontend empfangen: {payload}");

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("signalRServer")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5eee50fa8d455acd016ef29595a9c90bae00b27a")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+281ee5e2fd87f66da5022dee3e5e5b35b3b63323")]
 [assembly: System.Reflection.AssemblyProductAttribute("signalRServer")]
 [assembly: System.Reflection.AssemblyTitleAttribute("signalRServer")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

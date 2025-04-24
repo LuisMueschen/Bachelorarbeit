@@ -124,6 +124,11 @@ const fileInput = document.getElementById('fileInput') as HTMLInputElement; // i
 
 const connection = new signalR.HubConnectionBuilder()
     .withUrl("http://localhost:5500/myhub")
+    .withAutomaticReconnect({
+      nextRetryDelayInMilliseconds: retryContext => {
+        return Math.min(1000 * (retryContext.previousRetryCount + 1), 10000);
+      }
+    })
     .build();
 
 await connection.start();
@@ -143,6 +148,13 @@ fileInput.addEventListener('change', async (event: Event) => {
     addMeshToScene(file)
   }
 });
+
+connection.onreconnecting(() => console.log("Verbindung verloren"))
+
+connection.onreconnected(() => {
+  connection.invoke("register", "frontend")
+  console.log("Verbunden")
+})
 
 connection.on("ReceiveMessage", (data) => {
   console.log(`message received: ${data}`);

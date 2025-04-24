@@ -5,11 +5,6 @@ import numpy as np
 from signalrcore.hub_connection_builder import HubConnectionBuilder
 import time
 
-hub_connection = HubConnectionBuilder().with_url('http://localhost:5500/myhub').build()
-hub_connection.start()
-time.sleep(1)
-hub_connection.send("register", ["backend"])
-
 def load_mesh_from_base64(base64_string):
     mesh_bytes = base64.b64decode(base64_string)
     mesh = trimesh.load(io.BytesIO(mesh_bytes), file_type="stl")
@@ -65,11 +60,34 @@ def handle_transform(data):
     except Exception as e:
         print("Fehler bei der Transformation:", str(e))
 
-hub_connection.on('CheckConnection', check_connection)
-hub_connection.on('FileUploaded', handle_transform)
+def connect_with_retry():
+    while True:
+        try:
+            hub_connection = HubConnectionBuilder().with_url('http://localhost:5500/myhub').build()
+            hub_connection.start()
+            print("verbunden")
+            time.sleep(1)
+            hub_connection.send("register", ["backend"])
+            hub_connection.on('CheckConnection', check_connection)
+            hub_connection.on('FileUploaded', handle_transform)
+            return hub_connection
+        except:
+            print("Verbindung Fehlgeschlagen")
+            time.sleep(3)
+    
+hub_connection = connect_with_retry()
 
 try:
     while True:
-        time.sleep(1)
+        try:
+            hub_connection.send("ping", [])
+        except Exception as e:
+            print("Verbindung verloren")
+            try:
+                hub_connection.stop
+            except:
+                pass
+            hub_connection = connect_with_retry()
+        time.sleep(5)
 except KeyboardInterrupt:
     hub_connection.stop()
