@@ -3,8 +3,12 @@ import base64
 import trimesh
 import numpy as np
 from signalrcore.hub_connection_builder import HubConnectionBuilder
+import time
 
 hub_connection = HubConnectionBuilder().with_url('http://localhost:5500/myhub').build()
+hub_connection.start()
+time.sleep(1)
+hub_connection.send("register", ["backend"])
 
 def load_mesh_from_base64(base64_string):
     mesh_bytes = base64.b64decode(base64_string)
@@ -63,9 +67,7 @@ def handle_transform(data):
 
 hub_connection.on('CheckConnection', check_connection)
 hub_connection.on('FileUploaded', handle_transform)
-hub_connection.start()
 
-import time
 try:
     while True:
         time.sleep(1)

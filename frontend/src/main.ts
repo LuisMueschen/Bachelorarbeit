@@ -127,6 +127,7 @@ const connection = new signalR.HubConnectionBuilder()
     .build();
 
 await connection.start();
+connection.invoke("register", "frontend")
 
  // rest //
 
