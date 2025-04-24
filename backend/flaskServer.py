@@ -29,7 +29,7 @@ def upload():
 def download_file(filename):
     save_filename = secure_filename(filename)
     try:
-        return send_from_directory(UPLOAD_FOLDER, save_filename, as_attachment=False)
+        return send_from_directory(UPLOAD_FOLDER, save_filename, as_attachment=True)
     except FileNotFoundError:
         abort(404)
 

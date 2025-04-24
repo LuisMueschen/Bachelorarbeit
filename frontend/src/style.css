@@ -30,7 +30,10 @@ body {
 
 #objectDiv {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
+  background-color: rgb(90, 91, 94);
+  width: 100%;
+  border-bottom: 4px  solid black;
 }
 
 #communicationCheckButton{
