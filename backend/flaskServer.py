@@ -1,6 +1,7 @@
 import os
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory, abort
 from flask_cors import CORS
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 CORS(app)
@@ -23,6 +24,14 @@ def upload():
     print(f"Datei gespeichert unter: {file_path}")
 
     return jsonify({'filename': file.filename}), 200
+
+@app.route('/download/<filename>', methods=['GET'])
+def download_file(filename):
+    save_filename = secure_filename(filename)
+    try:
+        return send_from_directory(UPLOAD_FOLDER, save_filename, as_attachment=False)
+    except FileNotFoundError:
+        abort(404)
 
 if __name__ == "__main__":
     print("Starte Server")

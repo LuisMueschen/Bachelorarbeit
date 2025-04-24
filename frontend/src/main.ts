@@ -6,7 +6,7 @@ BABYLON.SceneLoader.RegisterPlugin(new STLFileLoader());
 
 // Functions //
 
-function createScene() {
+function createScene(): BABYLON.Scene {
   const scene = new BABYLON.Scene(engine);
 
   scene.createDefaultCameraOrLight(true, false, true);
@@ -14,12 +14,12 @@ function createScene() {
   return scene;
 };
 
-function checkConnection() {
+function checkConnection(): void {
   // socket.emit("check_connection", { message: "hello backend" });
   connection.invoke('SendToBackend', 'Hello Backend!')
 }
 
-function uploadFile(file: File){
+function uploadFile(file: File): void{
   const formData = new FormData();
   formData.append('file', file);
 
@@ -34,7 +34,20 @@ function uploadFile(file: File){
   .catch((err) => console.log("Fehler beim Upload:", err));
 };
 
-function addMeshToScene(file: File){
+async function downloadFile(filename: string): Promise<File>{
+  const response = await fetch(`http://localhost:5000/download/${filename}`);
+  if(!response.ok){
+    throw new Error("Download Fehlgeschlagen");
+  }
+  const blob = await response.blob();
+  const file = new File([blob], filename, {
+    type: blob.type,
+    lastModified: Date.now()
+  });
+  return file;
+};
+
+function addMeshToScene(file: File): void{
   const fileReader = new FileReader();
 
   fileReader.onload = (e) => {
@@ -134,9 +147,12 @@ connection.on("ReceiveMessage", (data) => {
   console.log(`message received: ${data}`);
 });
 
-connection.on("TransformedMesh", (data) => {
-  
-  // addMeshToScene(file)
+connection.on("MeshTransformed", (filename) => {
+  console.log(`Mesh bearbeitet ${filename}`)
+  downloadFile(filename)
+  .then((file) => {
+    addMeshToScene(file)
+  })
 });
 
 

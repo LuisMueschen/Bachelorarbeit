@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "/+gb9kKlDiZ/MXdpOLAyeyn5GpgxxrpJ8ZLoQL5YKDFkbCrOJOTO/NA35RNWZ3ZYUUFwGwfdeieuP//d0BuGfA==",
+  "dgSpecHash": "vUHVrZwu7/19/J3ljKT7bPMqm/bE9BNxEoyXRYtcIrSAsV9pDQK0Ti9T1REDWVlMArdlRK4O5xw/U1w45Y/gCw==",
   "success": true,
-  "projectFilePath": "/home/luis/babylonJS-Playground/signalRServer/signalRServer.csproj",
+  "projectFilePath": "/home/luismues/bachelorarbeit/signalRServer/signalRServer.csproj",
   "expectedPackageFiles": [],
   "logs": []
 }

@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "/home/luis/babylonJS-Playground/signalRServer/signalRServer.csproj": {}
+    "/home/luismues/bachelorarbeit/signalRServer/signalRServer.csproj": {}
   },
   "projects": {
-    "/home/luis/babylonJS-Playground/signalRServer/signalRServer.csproj": {
+    "/home/luismues/bachelorarbeit/signalRServer/signalRServer.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/luis/babylonJS-Playground/signalRServer/signalRServer.csproj",
+        "projectUniqueName": "/home/luismues/bachelorarbeit/signalRServer/signalRServer.csproj",
         "projectName": "signalRServer",
-        "projectPath": "/home/luis/babylonJS-Playground/signalRServer/signalRServer.csproj",
-        "packagesPath": "/home/luis/.nuget/packages/",
-        "outputPath": "/home/luis/babylonJS-Playground/signalRServer/obj/",
+        "projectPath": "/home/luismues/bachelorarbeit/signalRServer/signalRServer.csproj",
+        "packagesPath": "/home/luismues/.nuget/packages/",
+        "outputPath": "/home/luismues/bachelorarbeit/signalRServer/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/home/luis/.nuget/NuGet/NuGet.Config"
+          "/home/luismues/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
