@@ -60,12 +60,13 @@ function addMeshToScene(file: File): void{
         // scaling
         meshes[0].scaling.scaleInPlace(0.1);
         meshes[0].position.y = -1;
+        meshes[0].id = file.name
 
         // gizmo
         const positionGizmo = new BABYLON.PositionGizmo(utilLayer);
         positionGizmo.attachedMesh = meshes[0]
-        // const rotationGizmo = new BABYLON.RotationGizmo(utilLayer);
-        // rotationGizmo.attachedMesh = meshes[0]
+        const rotationGizmo = new BABYLON.RotationGizmo(utilLayer);
+        rotationGizmo.attachedMesh = meshes[0]
         
         // div for each object
         const objectDiv = document.createElement('div');
@@ -77,12 +78,12 @@ function addMeshToScene(file: File): void{
         gizmoButton.textContent = 'toggle gizmo';
         gizmoButton.className = 'gizmoBtn';
         gizmoButton.onclick = () => {
-          if (/*rotationGizmo.attachedMesh &&*/ positionGizmo.attachedMesh){
-            // rotationGizmo.attachedMesh = null;
+          if (rotationGizmo.attachedMesh && positionGizmo.attachedMesh){
+            rotationGizmo.attachedMesh = null;
             positionGizmo.attachedMesh = null;
           }
           else {
-            // rotationGizmo.attachedMesh = meshes[0];
+            rotationGizmo.attachedMesh = meshes[0];
             positionGizmo.attachedMesh = meshes[0];
           }
         };
@@ -94,9 +95,16 @@ function addMeshToScene(file: File): void{
         deleteButton.textContent = `${file.name} löschen`;
         deleteButton.className = 'deleteBtn';
         deleteButton.onclick = () => {
+          if(coordinateSpheres[meshes[0].id]){
+            coordinateSpheres[meshes[0].id].forEach(sphere => sphere.dispose());
+            delete coordinateSpheres[meshes[0].id]
+          }
+          if(selectedCoordinates[meshes[0].id]){
+            delete selectedCoordinates[meshes[0].id]
+          }
           meshes[0].dispose();
           positionGizmo.dispose();
-          // rotationGizmo.dispose();
+          rotationGizmo.dispose();
           document.getElementById('interface')?.removeChild(objectDiv);
         };
         objectDiv.appendChild(deleteButton);
@@ -114,6 +122,24 @@ function addMeshToScene(file: File): void{
   fileReader.readAsArrayBuffer(file);
 }
 
+function createSelection(mesh: BABYLON.Mesh, coordinatesAsVector: BABYLON.Vector3){
+  const sphere = BABYLON.MeshBuilder.CreateSphere('selectedPoint', {diameter: 0.1}, scene);
+  sphere.position = coordinatesAsVector.clone()
+  const coordinatesAsArray = coordinatesAsVector.asArray()  
+
+  // pushing marker spheres
+  if(!coordinateSpheres[mesh.id]){
+    coordinateSpheres[mesh.id] = [];
+  }
+  coordinateSpheres[mesh.id].push(sphere);
+
+  // // pushing marker coords
+  if(!selectedCoordinates[mesh.id]){
+    selectedCoordinates[mesh.id] = [] as [number, number, number][];
+  }
+  selectedCoordinates[mesh.id].push(coordinatesAsArray)
+}
+
 // Constants //
 
 const canvas = document.getElementById("renderCanvas") as HTMLCanvasElement;
@@ -121,7 +147,8 @@ const engine = new BABYLON.Engine(canvas);
 const scene = createScene();
 const utilLayer = new BABYLON.UtilityLayerRenderer(scene); // utility layer for gizmos
 const fileInput = document.getElementById('fileInput') as HTMLInputElement; // input to upload files
-const selectedCoordinates: Object[] = [];
+const selectedCoordinates: Record<string, [number, number, number][]> = {};
+const coordinateSpheres: Record<string, BABYLON.Mesh[]> = {};
 
 const connection = new signalR.HubConnectionBuilder()
     .withUrl("http://localhost:5500/myhub")
@@ -151,14 +178,12 @@ fileInput.addEventListener('change', async (event: Event) => {
 });
 
 canvas.addEventListener("pointerdown", (event) => {
-  const xCoord = event.clientX - window.screen.width*0.2;
-  const coordinates = scene.pick(xCoord, event.clientY);
+  const selectedPoint = scene.pick(event.clientX - window.screen.width*0.2, event.clientY);
+  const mesh = selectedPoint.pickedMesh as BABYLON.Mesh;
+  const coordinates = selectedPoint.pickedPoint as BABYLON.Vector3;
 
-  if(coordinates.hit && coordinates.pickedPoint){
-    selectedCoordinates.push({meshID: coordinates.pickedMesh?.id, point: coordinates.pickedPoint.asArray()});
-    const sphere = BABYLON.MeshBuilder.CreateSphere('selectedPoint', {diameter: 0.1} , scene);
-    sphere.position = coordinates.pickedPoint.clone();
-    console.log(selectedCoordinates);    
+  if(selectedPoint.hit && selectedPoint.pickedPoint){
+   createSelection(mesh, coordinates);
   }
 })
 
@@ -183,5 +208,7 @@ connection.on("MeshTransformed", (filename) => {
 
 const comCheckButton = document.getElementById("communicationCheckButton");
 if (comCheckButton) {
-  comCheckButton.onclick = () => { checkConnection(); };
+  comCheckButton.onclick = () => {
+    checkConnection();
+  };
 }
