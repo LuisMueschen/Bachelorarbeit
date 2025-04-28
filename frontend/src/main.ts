@@ -64,8 +64,8 @@ function addMeshToScene(file: File): void{
         // gizmo
         const positionGizmo = new BABYLON.PositionGizmo(utilLayer);
         positionGizmo.attachedMesh = meshes[0]
-        const rotationGizmo = new BABYLON.RotationGizmo(utilLayer);
-        rotationGizmo.attachedMesh = meshes[0]
+        // const rotationGizmo = new BABYLON.RotationGizmo(utilLayer);
+        // rotationGizmo.attachedMesh = meshes[0]
         
         // div for each object
         const objectDiv = document.createElement('div');
@@ -77,12 +77,12 @@ function addMeshToScene(file: File): void{
         gizmoButton.textContent = 'toggle gizmo';
         gizmoButton.className = 'gizmoBtn';
         gizmoButton.onclick = () => {
-          if (rotationGizmo.attachedMesh && positionGizmo.attachedMesh){
-            rotationGizmo.attachedMesh = null;
+          if (/*rotationGizmo.attachedMesh &&*/ positionGizmo.attachedMesh){
+            // rotationGizmo.attachedMesh = null;
             positionGizmo.attachedMesh = null;
           }
           else {
-            rotationGizmo.attachedMesh = meshes[0];
+            // rotationGizmo.attachedMesh = meshes[0];
             positionGizmo.attachedMesh = meshes[0];
           }
         };
@@ -96,7 +96,7 @@ function addMeshToScene(file: File): void{
         deleteButton.onclick = () => {
           meshes[0].dispose();
           positionGizmo.dispose();
-          rotationGizmo.dispose();
+          // rotationGizmo.dispose();
           document.getElementById('interface')?.removeChild(objectDiv);
         };
         objectDiv.appendChild(deleteButton);
@@ -121,6 +121,7 @@ const engine = new BABYLON.Engine(canvas);
 const scene = createScene();
 const utilLayer = new BABYLON.UtilityLayerRenderer(scene); // utility layer for gizmos
 const fileInput = document.getElementById('fileInput') as HTMLInputElement; // input to upload files
+const selectedCoordinates: Object[] = [];
 
 const connection = new signalR.HubConnectionBuilder()
     .withUrl("http://localhost:5500/myhub")
@@ -131,14 +132,14 @@ const connection = new signalR.HubConnectionBuilder()
     })
     .build();
 
-await connection.start();
-connection.invoke("register", "frontend")
-
  // rest //
 
 engine.runRenderLoop(() => {
   scene.render();
 });
+
+await connection.start();
+connection.invoke("register", "frontend")
 
 fileInput.addEventListener('change', async (event: Event) => {
   const target = event.target as HTMLInputElement;
@@ -148,6 +149,18 @@ fileInput.addEventListener('change', async (event: Event) => {
     addMeshToScene(file)
   }
 });
+
+canvas.addEventListener("pointerdown", (event) => {
+  const xCoord = event.clientX - window.screen.width*0.2;
+  const coordinates = scene.pick(xCoord, event.clientY);
+
+  if(coordinates.hit && coordinates.pickedPoint){
+    selectedCoordinates.push({meshID: coordinates.pickedMesh?.id, point: coordinates.pickedPoint.asArray()});
+    const sphere = BABYLON.MeshBuilder.CreateSphere('selectedPoint', {diameter: 0.1} , scene);
+    sphere.position = coordinates.pickedPoint.clone();
+    console.log(selectedCoordinates);    
+  }
+})
 
 connection.onreconnecting(() => console.log("Verbindung verloren"))
 
@@ -167,7 +180,6 @@ connection.on("MeshTransformed", (filename) => {
     addMeshToScene(file)
   })
 });
-
 
 const comCheckButton = document.getElementById("communicationCheckButton");
 if (comCheckButton) {
