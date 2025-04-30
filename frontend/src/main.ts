@@ -165,8 +165,7 @@ engine.runRenderLoop(() => {
   scene.render();
 });
 
-await connection.start();
-connection.invoke("register", "frontend")
+await connection.start().then(() => connection.invoke("register", "frontend"));
 
 fileInput.addEventListener('change', async (event: Event) => {
   const target = event.target as HTMLInputElement;
@@ -210,5 +209,7 @@ const comCheckButton = document.getElementById("communicationCheckButton");
 if (comCheckButton) {
   comCheckButton.onclick = () => {
     checkConnection();
+    console.log(selectedCoordinates);
+    
   };
 }

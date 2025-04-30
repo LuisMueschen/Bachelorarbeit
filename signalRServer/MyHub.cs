@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.SignalR;
 public class MyHub : Hub
 {
     public Task Register(string groupName){
-
         Groups.AddToGroupAsync(Context.ConnectionId, groupName);
         Console.WriteLine($"Client {Context.ConnectionId} mit Gruppe {groupName} verbunden");
         return Task.CompletedTask;

@@ -52,11 +52,11 @@ def handle_transform(data):
             mesh = trimesh.load(io.BytesIO(file.read()), file_type="stl")
             transformed_mesh = transform_mesh(mesh, (1, 1, 1), (1, 1, 1), (3, 1, 1))
 
-        with open(f"uploads/{file_name}", "wb") as file:
+        with open(f"uploads/streched-{file_name}", "wb") as file:
             file.write(transformed_mesh.export(file_type='stl'))
             
         # Ergebnis zurücksenden
-        hub_connection.send("NotifyFrontendAboutManipulatedMesh", [file_name])
+        hub_connection.send("NotifyFrontendAboutManipulatedMesh", [f"streched-{file_name}"])
     except Exception as e:
         print("Fehler bei der Transformation:", str(e))
 
