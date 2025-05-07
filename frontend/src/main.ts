@@ -4,22 +4,28 @@ import * as signalR from "@microsoft/signalr";
 
 BABYLON.SceneLoader.RegisterPlugin(new STLFileLoader());
 
+// Constants //
+
+const canvas = document.getElementById("renderCanvas") as HTMLCanvasElement;
+const engine = new BABYLON.Engine(canvas);
+const scene = new BABYLON.Scene(engine);
+const utilLayer = new BABYLON.UtilityLayerRenderer(scene); // utility layer for gizmos
+const fileInput = document.getElementById('fileInput') as HTMLInputElement; // input to upload files
+const selectedCoordinates: Record<string, [number, number, number][]> = {};
+const coordinateSpheres: Record<string, BABYLON.Mesh[]> = {};
+
+const connection = new signalR.HubConnectionBuilder()
+    .withUrl("http://localhost:5500/myhub")
+    .withAutomaticReconnect({
+      nextRetryDelayInMilliseconds: retryContext => {
+        return Math.min(1000 * (retryContext.previousRetryCount + 1), 10000);
+      }
+    })
+    .build();
+
 // Functions //
 
-function createScene(): BABYLON.Scene {
-  const scene = new BABYLON.Scene(engine);
-
-  scene.createDefaultCameraOrLight(true, false, true);
-
-  return scene;
-};
-
-function checkConnection(): void {
-  // socket.emit("check_connection", { message: "hello backend" });
-  connection.invoke('SendToBackend', 'Hello Backend!')
-}
-
-function uploadFile(file: File): void{
+function uploadFileToServer(file: File): void{
   const formData = new FormData();
   formData.append('file', file);
 
@@ -113,7 +119,7 @@ function addMeshToScene(file: File): void{
         const uploadButton = document.createElement('button');
         uploadButton.textContent = `${file.name} Hochladen`;
         uploadButton.className = 'uploadBtn';
-        uploadButton.onclick = () => {uploadFile(file)};
+        uploadButton.onclick = () => {uploadFileToServer(file)};
         objectDiv.appendChild(uploadButton);
       }, undefined, undefined, ".stl");
     }
@@ -140,26 +146,9 @@ function createSelection(mesh: BABYLON.Mesh, coordinatesAsVector: BABYLON.Vector
   selectedCoordinates[mesh.id].push(coordinatesAsArray)
 }
 
-// Constants //
-
-const canvas = document.getElementById("renderCanvas") as HTMLCanvasElement;
-const engine = new BABYLON.Engine(canvas);
-const scene = createScene();
-const utilLayer = new BABYLON.UtilityLayerRenderer(scene); // utility layer for gizmos
-const fileInput = document.getElementById('fileInput') as HTMLInputElement; // input to upload files
-const selectedCoordinates: Record<string, [number, number, number][]> = {};
-const coordinateSpheres: Record<string, BABYLON.Mesh[]> = {};
-
-const connection = new signalR.HubConnectionBuilder()
-    .withUrl("http://localhost:5500/myhub")
-    .withAutomaticReconnect({
-      nextRetryDelayInMilliseconds: retryContext => {
-        return Math.min(1000 * (retryContext.previousRetryCount + 1), 10000);
-      }
-    })
-    .build();
-
  // rest //
+
+scene.createDefaultCameraOrLight(true, false, true);
 
 engine.runRenderLoop(() => {
   scene.render();
@@ -208,7 +197,7 @@ connection.on("MeshTransformed", (filename) => {
 const comCheckButton = document.getElementById("communicationCheckButton");
 if (comCheckButton) {
   comCheckButton.onclick = () => {
-    checkConnection();
+    connection.invoke('SendToBackend', 'Hello Backend!');
     console.log(selectedCoordinates);
     
   };
