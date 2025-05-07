@@ -18,12 +18,12 @@ def upload():
     if file.filename == '':
         return jsonify({'error': 'No selected file'}), 400
 
-    file_path = os.path.join(UPLOAD_FOLDER, file.filename)
+    file_path = os.path.join(UPLOAD_FOLDER, secure_filename(file.filename))
     file.save(file_path)
 
     print(f"Datei gespeichert unter: {file_path}")
 
-    return jsonify({'filename': file.filename}), 200
+    return jsonify({'filename': secure_filename(file.filename)}), 200
 
 @app.route('/download/<filename>', methods=['GET'])
 def download_file(filename):

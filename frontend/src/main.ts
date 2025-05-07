@@ -33,9 +33,10 @@ function uploadFileToServer(file: File): void{
     method: "POST",
     body: formData
   })
-  .then(() => {
-    console.log(file.name, 'hochgeladen');
-    connection.invoke('NotifyBackendAboutFileUpload', file.name)
+  .then((res) => res.json())
+  .then((response) => {
+    console.log(response.filename, 'hochgeladen');   
+    connection.invoke('NotifyBackendAboutFileUpload', response.filename)
   })
   .catch((err) => console.log("Fehler beim Upload:", err));
 };
