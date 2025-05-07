@@ -40,7 +40,7 @@ function uploadFileToServer(file: File): void{
   .catch((err) => console.log("Fehler beim Upload:", err));
 };
 
-async function downloadFile(filename: string): Promise<File>{
+async function downloadFileIntoScene(filename: string): Promise<File>{
   const response = await fetch(`http://localhost:5000/download/${filename}`);
   if(!response.ok){
     throw new Error("Download Fehlgeschlagen");
@@ -121,6 +121,15 @@ function addMeshToScene(file: File): void{
         uploadButton.className = 'uploadBtn';
         uploadButton.onclick = () => {uploadFileToServer(file)};
         objectDiv.appendChild(uploadButton);
+
+        // download link
+        const downloadButton = document.createElement('button');
+        const link = document.createElement('a');
+        link.textContent = `${file.name} runterladen`
+        link.href = `http://localhost:5000/download/${file.name}`;
+        link.className = 'downloadLink'
+        downloadButton.appendChild(link);
+        objectDiv.appendChild(downloadButton);
       }, undefined, undefined, ".stl");
     }
   };
@@ -154,7 +163,7 @@ engine.runRenderLoop(() => {
   scene.render();
 });
 
-await connection.start().then(() => connection.invoke("register", "frontend"));
+connection.start().then(() => connection.invoke("register", "frontend"));
 
 fileInput.addEventListener('change', async (event: Event) => {
   const target = event.target as HTMLInputElement;
@@ -188,7 +197,7 @@ connection.on("ReceiveMessage", (data) => {
 
 connection.on("MeshTransformed", (filename) => {
   console.log(`Mesh bearbeitet ${filename}`)
-  downloadFile(filename)
+  downloadFileIntoScene(filename)
   .then((file) => {
     addMeshToScene(file)
   })
