@@ -14,8 +14,11 @@ const fileInput = document.getElementById('fileInput') as HTMLInputElement; // i
 const selectedCoordinates: Record<string, [number, number, number][]> = {};
 const coordinateSpheres: Record<string, BABYLON.Mesh[]> = {};
 
+const signalRAdress = 'http://localhost:5500/myhub'
+const fileServerAdress = 'http://localhost:5000'
+
 const connection = new signalR.HubConnectionBuilder()
-    .withUrl("http://localhost:5500/myhub")
+    .withUrl(signalRAdress)
     .withAutomaticReconnect({
       nextRetryDelayInMilliseconds: retryContext => {
         return Math.min(1000 * (retryContext.previousRetryCount + 1), 10000);
@@ -29,7 +32,7 @@ function uploadFileToServer(file: File): void{
   const formData = new FormData();
   formData.append('file', file);
 
-  fetch("http://localhost:5000/upload", {
+  fetch(`${fileServerAdress}/upload`, {
     method: "POST",
     body: formData
   })
@@ -42,7 +45,7 @@ function uploadFileToServer(file: File): void{
 };
 
 async function downloadFileIntoScene(filename: string): Promise<File>{
-  const response = await fetch(`http://localhost:5000/download/${filename}`);
+  const response = await fetch(`${fileServerAdress}/download/${filename}`);
   if(!response.ok){
     throw new Error("Download Fehlgeschlagen");
   }
@@ -68,6 +71,14 @@ function addMeshToScene(file: File): void{
         meshes[0].scaling.scaleInPlace(0.1);
         meshes[0].position.y = -1;
         meshes[0].id = file.name
+        meshes[0].name = file.name
+
+        // material
+        const meshMat = new BABYLON.StandardMaterial('meshMat', scene);
+        meshMat.diffuseColor = new BABYLON.Color3(0.8,0.8,0.8);
+        meshMat.alpha = 1;
+        meshMat.needDepthPrePass = true;
+        meshes[0].material = meshMat;
 
         // gizmo
         const positionGizmo = new BABYLON.PositionGizmo(utilLayer);
@@ -127,8 +138,8 @@ function addMeshToScene(file: File): void{
         const downloadButton = document.createElement('button');
         const link = document.createElement('a');
         link.textContent = `${file.name} runterladen`
-        link.href = `http://localhost:5000/download/${file.name}`;
-        link.className = 'downloadLink'
+        link.href = `${fileServerAdress}/download/${file.name}`;
+        link.className = 'downloadLink';
         downloadButton.appendChild(link);
         objectDiv.appendChild(downloadButton);
       }, undefined, undefined, ".stl");
@@ -139,9 +150,22 @@ function addMeshToScene(file: File): void{
 }
 
 function createSelection(mesh: BABYLON.Mesh, coordinatesAsVector: BABYLON.Vector3){
-  const sphere = BABYLON.MeshBuilder.CreateSphere('selectedPoint', {diameter: 0.1}, scene);
-  sphere.position = coordinatesAsVector.clone()
-  const coordinatesAsArray = coordinatesAsVector.asArray()  
+  const sphere = BABYLON.MeshBuilder.CreateSphere('selectedPoint', {diameter: 10}, scene);
+  sphere.position = coordinatesAsVector.clone();
+  sphere.metadata = {
+    parentsMeshId: mesh.id,
+    position: coordinatesAsVector.asArray()
+  };
+  const sphereMat = new BABYLON.StandardMaterial('sphereMat', scene);
+  sphereMat.diffuseColor = new BABYLON.Color3(0,0,1);
+  sphereMat.alpha = 1;
+  sphereMat.needDepthPrePass = true;
+  sphere.material = sphereMat;
+
+  sphere.actionManager = new BABYLON.ActionManager(scene);
+  sphere.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickDownTrigger, () => {
+    deselectPoint(sphere);
+  }));
 
   // pushing marker spheres
   if(!coordinateSpheres[mesh.id]){
@@ -153,7 +177,24 @@ function createSelection(mesh: BABYLON.Mesh, coordinatesAsVector: BABYLON.Vector
   if(!selectedCoordinates[mesh.id]){
     selectedCoordinates[mesh.id] = [] as [number, number, number][];
   }
-  selectedCoordinates[mesh.id].push(coordinatesAsArray)
+  selectedCoordinates[mesh.id].push(sphere.metadata.position)
+}
+
+function deselectPoint(sphere: BABYLON.Mesh){
+  console.log("deselecting");
+  
+  const parentsMeshId = sphere.metadata.parentsMeshId;
+  const position = sphere.metadata.position as [number, number, number];
+
+  sphere.dispose();
+
+  // removing sphere from dictionary
+  coordinateSpheres[parentsMeshId] = coordinateSpheres[parentsMeshId].filter(s => s != sphere);
+
+  // removing coords from dictionary
+  selectedCoordinates[parentsMeshId] = selectedCoordinates[parentsMeshId].filter(coord => 
+    !(coord[0] === position[0] && coord[1] === position[1] && coord[2] === position[2])
+  );
 }
 
  // rest //
@@ -176,12 +217,18 @@ fileInput.addEventListener('change', async (event: Event) => {
 });
 
 canvas.addEventListener("pointerdown", (event) => {
-  const selectedPoint = scene.pick(event.clientX - window.screen.width*0.2, event.clientY);
-  const mesh = selectedPoint.pickedMesh as BABYLON.Mesh;
-  const coordinates = selectedPoint.pickedPoint as BABYLON.Vector3;
+  const selectedPoint = scene.pick(event.clientX - window.screen.width*0.2, event.clientY, undefined, false);
+  console.log(selectedPoint.pickedMesh?.name);
+  
+  if(selectedPoint.pickedMesh?.name === 'selectedPoint'){
+    deselectPoint(selectedPoint.pickedMesh as BABYLON.Mesh)
+    return
+  }
 
   if(selectedPoint.hit && selectedPoint.pickedPoint){
-   createSelection(mesh, coordinates);
+    const mesh = selectedPoint.pickedMesh as BABYLON.Mesh;
+    const coordinates = selectedPoint.pickedPoint as BABYLON.Vector3;
+    createSelection(mesh, coordinates);
   }
 })
 
@@ -209,6 +256,6 @@ if (comCheckButton) {
   comCheckButton.onclick = () => {
     connection.invoke('SendToBackend', 'Hello Backend!');
     console.log(selectedCoordinates);
-    
+    console.log(coordinateSpheres);   
   };
 }
