@@ -26,12 +26,12 @@ public class MyHub : Hub
     public async Task NotifyBackendAboutFileUpload(string filename)
     {
         Console.WriteLine("Datei wurde hochgeladen: " + filename);
-        await Clients.Group("backend").SendAsync("FileUploaded", filename);
+        await Clients.Group("backend").SendAsync("FileUploaded", filename, Context.ConnectionId);
     }
 
-    public async Task NotifyFrontendAboutManipulatedMesh(string filename)
+    public async Task NotifyFrontendAboutManipulatedMesh(string filename, string connectionID)
     {
         Console.WriteLine("Mesh wurde bearbeitet: " + filename);
-        await Clients.Group("frontend").SendAsync("MeshTransformed", filename);
+        await Clients.Client(connectionID).SendAsync("MeshTransformed", filename);
     }
 }

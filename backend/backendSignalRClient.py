@@ -40,7 +40,8 @@ def check_connection(args):
 def handle_transform(data):
     # Empfängt Mesh-Daten vom Frontend, transformiert das Modell und sendet es zurück.
     file_name = data[0]
-    print(file_name)
+    connection_id = data[1]
+    print(data)
 
     # translation = tuple(data["translation"])
     # rotation = tuple(data["rotation"])
@@ -56,7 +57,7 @@ def handle_transform(data):
             file.write(transformed_mesh.export(file_type='stl'))
             
         # Ergebnis zurücksenden
-        hub_connection.send("NotifyFrontendAboutManipulatedMesh", [f"streched-{file_name}"])
+        hub_connection.send("NotifyFrontendAboutManipulatedMesh", [f"streched-{file_name}", connection_id])
     except Exception as e:
         print("Fehler bei der Transformation:", str(e))
 
