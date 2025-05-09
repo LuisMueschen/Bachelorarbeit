@@ -73,6 +73,8 @@ function addMeshToScene(file: File): void{
         meshes[0].id = file.name
         meshes[0].name = file.name
 
+        setupMeshInteraction(meshes[0] as BABYLON.Mesh)
+
         // material
         const meshMat = new BABYLON.StandardMaterial('meshMat', scene);
         meshMat.diffuseColor = new BABYLON.Color3(0.8,0.8,0.8);
@@ -149,8 +151,19 @@ function addMeshToScene(file: File): void{
   fileReader.readAsArrayBuffer(file);
 }
 
+function setupMeshInteraction(mesh: BABYLON.Mesh){
+  mesh.actionManager = new BABYLON.ActionManager(scene)
+  mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickDownTrigger, () => {
+    const clickedPoint = scene.pick(scene.pointerX, scene.pointerY, undefined, false)
+    
+    if(clickedPoint.hit && clickedPoint.pickedPoint){
+      createSelection(mesh, clickedPoint.pickedPoint)      
+    }
+  }))
+}
+
 function createSelection(mesh: BABYLON.Mesh, coordinatesAsVector: BABYLON.Vector3){
-  const sphere = BABYLON.MeshBuilder.CreateSphere('selectedPoint', {diameter: 10}, scene);
+  const sphere = BABYLON.MeshBuilder.CreateSphere('selectedPoint', {diameter: 0.1}, scene);
   sphere.position = coordinatesAsVector.clone();
   sphere.metadata = {
     parentsMeshId: mesh.id,
@@ -215,22 +228,6 @@ fileInput.addEventListener('change', async (event: Event) => {
     addMeshToScene(file)
   }
 });
-
-canvas.addEventListener("pointerdown", (event) => {
-  const selectedPoint = scene.pick(event.clientX - window.screen.width*0.2, event.clientY, undefined, false);
-  console.log(selectedPoint.pickedMesh?.name);
-  
-  if(selectedPoint.pickedMesh?.name === 'selectedPoint'){
-    deselectPoint(selectedPoint.pickedMesh as BABYLON.Mesh)
-    return
-  }
-
-  if(selectedPoint.hit && selectedPoint.pickedPoint){
-    const mesh = selectedPoint.pickedMesh as BABYLON.Mesh;
-    const coordinates = selectedPoint.pickedPoint as BABYLON.Vector3;
-    createSelection(mesh, coordinates);
-  }
-})
 
 connection.onreconnecting(() => console.log("Verbindung verloren"))
 
