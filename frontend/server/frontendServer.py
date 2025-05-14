@@ -40,5 +40,5 @@ class Serv(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(bytes(f'Error: {e}', 'utf-8'))
 
-httpd = HTTPServer(('localhost', 8080), Serv)
+httpd = HTTPServer(('0.0.0.0', 8080), Serv)
 httpd.serve_forever()

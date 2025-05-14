@@ -1,6 +1,7 @@
 import * as BABYLON from 'babylonjs';
 import { STLFileLoader } from 'babylonjs-loaders';
 import * as signalR from "@microsoft/signalr";
+// import * as processenv from 'processenv'
 
 BABYLON.SceneLoader.RegisterPlugin(new STLFileLoader());
 
@@ -14,11 +15,12 @@ const fileInput = document.getElementById('fileInput') as HTMLInputElement; // i
 const selectedCoordinates: Record<string, [number, number, number][]> = {};
 const coordinateSpheres: Record<string, BABYLON.Mesh[]> = {};
 
-const signalRAdress = 'http://localhost:5500/myhub'
+const dotnetAdress = 'http://localhost:5500/myhub'
+// const dotnetAdress = processenv.processenv('dotnetAdress','http://localhost:5500/myhub') as string
 const fileServerAdress = 'http://localhost:5000'
 
 const connection = new signalR.HubConnectionBuilder()
-    .withUrl(signalRAdress)
+    .withUrl(dotnetAdress)
     .withAutomaticReconnect({
       nextRetryDelayInMilliseconds: retryContext => {
         return Math.min(1000 * (retryContext.previousRetryCount + 1), 10000);
@@ -74,13 +76,6 @@ function addMeshToScene(file: File): void{
         meshes[0].name = file.name
 
         setupMeshInteraction(meshes[0] as BABYLON.Mesh)
-
-        // material
-        const meshMat = new BABYLON.StandardMaterial('meshMat', scene);
-        meshMat.diffuseColor = new BABYLON.Color3(0.8,0.8,0.8);
-        meshMat.alpha = 1;
-        meshMat.needDepthPrePass = true;
-        meshes[0].material = meshMat;
 
         // gizmo
         const positionGizmo = new BABYLON.PositionGizmo(utilLayer);
@@ -163,12 +158,22 @@ function setupMeshInteraction(mesh: BABYLON.Mesh){
 }
 
 function createSelection(mesh: BABYLON.Mesh, coordinatesAsVector: BABYLON.Vector3){
-  const sphere = BABYLON.MeshBuilder.CreateSphere('selectedPoint', {diameter: 0.1}, scene);
-  sphere.position = coordinatesAsVector.clone();
+
+  const sphere = BABYLON.MeshBuilder.CreateSphere('selectedPoint', {diameter: 1}, scene);
+
+  // Convert world position to local position relative to the parent mesh
+  const localPosition = BABYLON.Vector3.TransformCoordinates(
+    coordinatesAsVector,
+    BABYLON.Matrix.Invert(mesh.getWorldMatrix())
+  );
+  sphere.position = localPosition
+  sphere.parent = mesh;
+
   sphere.metadata = {
     parentsMeshId: mesh.id,
     position: coordinatesAsVector.asArray()
   };
+
   const sphereMat = new BABYLON.StandardMaterial('sphereMat', scene);
   sphereMat.diffuseColor = new BABYLON.Color3(0,0,1);
   sphereMat.alpha = 1;
@@ -190,7 +195,7 @@ function createSelection(mesh: BABYLON.Mesh, coordinatesAsVector: BABYLON.Vector
   if(!selectedCoordinates[mesh.id]){
     selectedCoordinates[mesh.id] = [] as [number, number, number][];
   }
-  selectedCoordinates[mesh.id].push(sphere.metadata.position)
+  selectedCoordinates[mesh.id].push(sphere.position.asArray())
 }
 
 function deselectPoint(sphere: BABYLON.Mesh){
@@ -253,6 +258,6 @@ if (comCheckButton) {
   comCheckButton.onclick = () => {
     connection.invoke('SendToBackend', 'Hello Backend!');
     console.log(selectedCoordinates);
-    console.log(coordinateSpheres);   
+    console.log(coordinateSpheres);
   };
 }

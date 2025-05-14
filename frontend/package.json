@@ -1,5 +1,5 @@
 {
-  "name": "babylonjs-playground",
+  "name": "bachelorarbeit",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -16,6 +16,6 @@
     "@microsoft/signalr": "^8.0.7",
     "babylonjs": "^7.54.0",
     "babylonjs-loaders": "^7.54.0",
-    "socket.io-client": "^4.8.1"
+    "processenv": "^3.0.9"
   }
 }
