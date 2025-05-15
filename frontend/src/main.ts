@@ -30,7 +30,7 @@ const connection = new signalR.HubConnectionBuilder()
 
 // Functions //
 
-function uploadFileToServer(file: File): void{
+function uploadFileToServer(file: File, xAxisValue: string, yAxisValue: string, zAxisValue: string): void{
   const formData = new FormData();
   formData.append('file', file);
 
@@ -41,7 +41,7 @@ function uploadFileToServer(file: File): void{
   .then((res) => res.json())
   .then((response) => {
     console.log(response.filename, 'hochgeladen');   
-    connection.invoke('NotifyBackendAboutFileUpload', response.filename)
+    connection.invoke('NotifyBackendAboutFileUpload', response.filename, xAxisValue, yAxisValue, zAxisValue)
   })
   .catch((err) => console.log("Fehler beim Upload:", err));
 };
@@ -75,75 +75,104 @@ function addMeshToScene(file: File): void{
         meshes[0].id = file.name
         meshes[0].name = file.name
 
-        setupMeshInteraction(meshes[0] as BABYLON.Mesh)
-
         // gizmo
         const positionGizmo = new BABYLON.PositionGizmo(utilLayer);
         positionGizmo.attachedMesh = meshes[0]
         const rotationGizmo = new BABYLON.RotationGizmo(utilLayer);
         rotationGizmo.attachedMesh = meshes[0]
         
-        // div for each object
-        const objectDiv = document.createElement('div');
-        objectDiv.id = 'objectDiv';
-        document.getElementById('interface')?.appendChild(objectDiv);
-        
-        // gizmo button
-        const gizmoButton = document.createElement('button');
-        gizmoButton.textContent = 'toggle gizmo';
-        gizmoButton.className = 'gizmoBtn';
-        gizmoButton.onclick = () => {
-          if (rotationGizmo.attachedMesh && positionGizmo.attachedMesh){
-            rotationGizmo.attachedMesh = null;
-            positionGizmo.attachedMesh = null;
-          }
-          else {
-            rotationGizmo.attachedMesh = meshes[0];
-            positionGizmo.attachedMesh = meshes[0];
-          }
-        };
-        objectDiv.appendChild(gizmoButton);
-        
-         // remove button
-        const deleteButton = document.createElement('button');
-        deleteButton.name = file.name;
-        deleteButton.textContent = `${file.name} löschen`;
-        deleteButton.className = 'deleteBtn';
-        deleteButton.onclick = () => {
-          if(coordinateSpheres[meshes[0].id]){
-            coordinateSpheres[meshes[0].id].forEach(sphere => sphere.dispose());
-            delete coordinateSpheres[meshes[0].id]
-          }
-          if(selectedCoordinates[meshes[0].id]){
-            delete selectedCoordinates[meshes[0].id]
-          }
-          meshes[0].dispose();
-          positionGizmo.dispose();
-          rotationGizmo.dispose();
-          document.getElementById('interface')?.removeChild(objectDiv);
-        };
-        objectDiv.appendChild(deleteButton);
-
-        // upload button
-        const uploadButton = document.createElement('button');
-        uploadButton.textContent = `${file.name} Hochladen`;
-        uploadButton.className = 'uploadBtn';
-        uploadButton.onclick = () => {uploadFileToServer(file)};
-        objectDiv.appendChild(uploadButton);
-
-        // download link
-        const downloadButton = document.createElement('button');
-        const link = document.createElement('a');
-        link.textContent = `${file.name} runterladen`
-        link.href = `${fileServerAdress}/download/${file.name}`;
-        link.className = 'downloadLink';
-        downloadButton.appendChild(link);
-        objectDiv.appendChild(downloadButton);
+        createMeshInterface(file, meshes[0] as BABYLON.Mesh, positionGizmo, rotationGizmo)
+        setupMeshInteraction(meshes[0] as BABYLON.Mesh)
       }, undefined, undefined, ".stl");
     }
   };
 
   fileReader.readAsArrayBuffer(file);
+}
+
+function createMeshInterface(file: File, mesh: BABYLON.Mesh, positionGizmo: BABYLON.PositionGizmo, rotationGizmo: BABYLON.RotationGizmo): void {
+  const objectDiv = document.createElement('div');
+  objectDiv.className = 'objectDiv';
+  document.getElementById('interface')?.appendChild(objectDiv);
+  
+  // parameter inputs
+  const xAxisDiv = document.createElement("div")
+  xAxisDiv.className = "axisDiv"
+  const xAxisInput = document.createElement("input")
+  const xAxisLabel = document.createElement("label")
+  xAxisLabel.textContent = "X-Achse"
+  xAxisDiv.appendChild(xAxisLabel)
+  xAxisDiv.appendChild(xAxisInput)
+  objectDiv.appendChild(xAxisDiv)
+  const yAxisDiv = document.createElement("div")
+  yAxisDiv.className = "axisDiv"
+  const yAxisInput = document.createElement("input")
+  const yAxisLabel = document.createElement("label")
+  yAxisLabel.textContent = "Y-Achse"
+  yAxisDiv.appendChild(yAxisLabel)
+  yAxisDiv.appendChild(yAxisInput)
+  objectDiv.appendChild(yAxisDiv)
+  const zAxisDiv = document.createElement("div")
+  zAxisDiv.className = "axisDiv"
+  const zAxisInput = document.createElement("input")
+  const zAxisLabel = document.createElement("label")
+  zAxisLabel.textContent = "Z-Achse"
+  zAxisDiv.appendChild(zAxisLabel)
+  zAxisDiv.appendChild(zAxisInput)
+  objectDiv.appendChild(zAxisDiv)
+
+  // gizmo button
+  const gizmoButton = document.createElement('button');
+  gizmoButton.textContent = 'toggle gizmo';
+  gizmoButton.className = 'gizmoBtn';
+  gizmoButton.onclick = () => {
+    if (rotationGizmo.attachedMesh && positionGizmo.attachedMesh){
+      rotationGizmo.attachedMesh = null;
+      positionGizmo.attachedMesh = null;
+    }
+    else {
+      rotationGizmo.attachedMesh = mesh;
+      positionGizmo.attachedMesh = mesh;
+    }
+  };
+  objectDiv.appendChild(gizmoButton);
+  
+    // remove button
+  const deleteButton = document.createElement('button');
+  deleteButton.name = file.name;
+  deleteButton.textContent = `${file.name} löschen`;
+  deleteButton.className = 'deleteBtn';
+  deleteButton.onclick = () => {
+    if(coordinateSpheres[mesh.id]){
+      coordinateSpheres[mesh.id].forEach(sphere => sphere.dispose());
+      delete coordinateSpheres[mesh.id]
+    }
+    if(selectedCoordinates[mesh.id]){
+      delete selectedCoordinates[mesh.id]
+    }
+    mesh.dispose();
+    positionGizmo.dispose();
+    rotationGizmo.dispose();
+    document.getElementById('interface')?.removeChild(objectDiv);
+  };
+  objectDiv.appendChild(deleteButton);
+
+  // upload button
+  const uploadButton = document.createElement('button');
+  uploadButton.textContent = `${file.name} Hochladen`;
+  uploadButton.className = 'uploadBtn';
+  uploadButton.onclick = () => {uploadFileToServer(file, xAxisInput.value, yAxisInput.value, zAxisInput.value)};
+  objectDiv.appendChild(uploadButton);
+
+  // download link
+  const downloadButton = document.createElement('button');
+  downloadButton.className = "downloadBtn"
+  const link = document.createElement('a');
+  link.textContent = `${file.name} runterladen`
+  link.href = `${fileServerAdress}/download/${file.name}`;
+  link.className = 'downloadLink';
+  downloadButton.appendChild(link);
+  objectDiv.appendChild(downloadButton);
 }
 
 function setupMeshInteraction(mesh: BABYLON.Mesh){

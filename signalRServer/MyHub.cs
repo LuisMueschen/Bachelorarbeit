@@ -23,10 +23,10 @@ public class MyHub : Hub
         await Clients.Group("frontend").SendAsync("ReceiveMessage", payload);
     }
 
-    public async Task NotifyBackendAboutFileUpload(string filename)
+    public async Task NotifyBackendAboutFileUpload(string filename, string xAxisValue, string yAxisValue, string zAxisValue)
     {
         Console.WriteLine("Datei wurde hochgeladen: " + filename);
-        await Clients.Group("backend").SendAsync("FileUploaded", filename, Context.ConnectionId);
+        await Clients.Group("backend").SendAsync("FileUploaded", filename, Context.ConnectionId, xAxisValue, yAxisValue, zAxisValue);
     }
 
     public async Task NotifyFrontendAboutManipulatedMesh(string filename, string connectionID)

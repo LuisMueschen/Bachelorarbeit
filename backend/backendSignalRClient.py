@@ -5,34 +5,6 @@ import numpy as np
 from signalrcore.hub_connection_builder import HubConnectionBuilder
 import time
 
-def load_mesh_from_base64(base64_string):
-    mesh_bytes = base64.b64decode(base64_string)
-    mesh = trimesh.load(io.BytesIO(mesh_bytes), file_type="stl")
-    return mesh
-
-def transform_mesh(mesh, translation=(0, 0, 0), rotation=(0, 0, 0), scale=1.0):
-    # Transformiert das Mesh durch Verschiebung, Rotation und Skalierung.
-    mesh.apply_scale(scale)
-
-    # Rotation in Radiant umwandeln und Matrix berechnen
-    rotation_matrix = trimesh.transformations.euler_matrix(
-        np.radians(rotation[0]),  # X-Achse
-        np.radians(rotation[1]),  # Y-Achse
-        np.radians(rotation[2])   # Z-Achse
-    )
-    mesh.apply_transform(rotation_matrix)
-
-    # Verschieben
-    mesh.apply_translation(translation)
-
-    return mesh
-
-def mesh_to_base64(mesh):
-    # Konvertiert ein Mesh in einen Base64-String.
-    buffer = io.BytesIO()
-    mesh.export(buffer, file_type="stl")  # Dateiformat anpassen
-    return base64.b64encode(buffer.getvalue()).decode()
-
 def check_connection(args):
     print("message received: " + args[0])
     hub_connection.send("SendToFrontend", ["Hello Frontend!"])
@@ -41,17 +13,16 @@ def handle_transform(data):
     # Empfängt Mesh-Daten vom Frontend, transformiert das Modell und sendet es zurück.
     file_name = data[0]
     connection_id = data[1]
+    x_axis_value = float(data[2])
+    y_axis_value = float(data[3])
+    z_axis_value = float(data[4])
     print(data)
-
-    # translation = tuple(data["translation"])
-    # rotation = tuple(data["rotation"])
-    # scale = data["scale"]
 
     try:
         # 3D-Modell laden und transformieren
         with open(f"uploads/{file_name}", "rb") as file:
             mesh = trimesh.load(io.BytesIO(file.read()), file_type="stl")
-            transformed_mesh = transform_mesh(mesh, (1, 1, 1), (1, 1, 1), (3, 1, 1))
+            transformed_mesh = mesh.apply_scale((x_axis_value, y_axis_value, z_axis_value))
 
         with open(f"uploads/streched-{file_name}", "wb") as file:
             file.write(transformed_mesh.export(file_type='stl'))

@@ -28,19 +28,11 @@ body {
   align-items: flex-start;
 }
 
-#objectDiv {
-  display: flex;
-  flex-direction: column;
-  background-color: rgb(90, 91, 94);
-  width: 100%;
-  border-bottom: 4px  solid black;
-}
-
 #communicationCheckButton{
   background-color: rgb(194, 194, 194);
   margin: 5px;
   border-radius: 7px;
-  border: 1px solid rgb(58, 58, 58);
+  border: 2px solid rgb(58, 58, 58);
   font-size: 12pt;
   /* display: none; */
 }
@@ -49,7 +41,7 @@ body {
   background-color: rgb(135, 135, 135);
   margin: 5px;
   border-radius: 7px;
-  border: 1px solid rgb(58, 58, 58);
+  border: 2px solid rgb(58, 58, 58);
   font-size: 12pt;
   padding: 5px;
   font-family: Arial, sans-serif;
@@ -59,31 +51,53 @@ body {
   display: none;
 }
 
-button {
+.objectDiv {
+  display: flex;
+  flex-direction: column;
+  background-color: rgb(90, 91, 94);
+  width: 100%;
+  border-top: 4px  solid black;
+  border-bottom: 4px  solid black;
+  margin-bottom: 4px;
+  padding-top: 5px;
+}
+
+.objectDiv button {
   margin: 5px;
   border-radius: 7px;
-  border: 1px solid black;
+  border: 2px solid black;
   font-size: 11pt;
 }
 
 .deleteBtn {
   background-color: rgb(185, 71, 71);
-  margin: 5px;
-  border-radius: 7px;
-  border: 1px solid rgb(68, 54, 54);
-  font-size: 11pt;
 }
 
 .uploadBtn {
   background-color: rgb(117, 117, 117);
-  margin: 5px;
-  margin-left: 0;
-  border-radius: 7px;
-  border: 1px solid rgb(64, 64, 64);
-  font-size: 11pt;
+}
+
+.downloadBtn {
+  background-color: rgb(98, 176, 221);
 }
 
 .downloadLink {
   text-decoration: none;
   color: black;
+}
+
+.axisDiv {
+  display: flex;
+  flex-direction: row;
+}
+
+.axisDiv input {
+  margin: 5px;
+  border: 2px solid black;
+}
+
+.axisDiv label {
+  margin-left: 6px;
+  font-size: 14pt;
+  font-family: Arial, sans-serif;
 }
