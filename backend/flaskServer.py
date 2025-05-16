@@ -48,9 +48,21 @@ def handle_transform(data):
     # Empfängt Mesh-Daten vom Frontend, transformiert das Modell und sendet es zurück.
     file_name = data[0]
     connection_id = data[1]
-    x_axis_value = float(data[2])
-    y_axis_value = float(data[3])
-    z_axis_value = float(data[4])
+    if data[2] != '':
+        x_axis_value = float(data[2])
+    else:
+        x_axis_value = 1
+
+    if data[3] != '':
+        y_axis_value = float(data[3])
+    else:
+        y_axis_value = 1
+
+    if data[4] != '':
+        z_axis_value = float(data[4])
+    else:
+        z_axis_value = 1
+
     print(data)
 
     try:
@@ -92,7 +104,7 @@ def start_signalR_client():
         except Exception as e:
             print("Verbindung verloren")
             try:
-                hub_connection.stop
+                hub_connection.stop()
             except:
                 pass
             hub_connection = connect_with_retry()

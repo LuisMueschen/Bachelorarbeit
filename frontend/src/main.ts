@@ -97,29 +97,85 @@ function createMeshInterface(file: File, mesh: BABYLON.Mesh, positionGizmo: BABY
   
   // parameter inputs
   const xAxisDiv = document.createElement("div")
-  xAxisDiv.className = "axisDiv"
+  xAxisDiv.className = "parameterDiv"
   const xAxisInput = document.createElement("input")
   const xAxisLabel = document.createElement("label")
+  xAxisInput.type = "number"
   xAxisLabel.textContent = "X-Achse"
   xAxisDiv.appendChild(xAxisLabel)
   xAxisDiv.appendChild(xAxisInput)
   objectDiv.appendChild(xAxisDiv)
   const yAxisDiv = document.createElement("div")
-  yAxisDiv.className = "axisDiv"
+  yAxisDiv.className = "parameterDiv"
   const yAxisInput = document.createElement("input")
   const yAxisLabel = document.createElement("label")
+  yAxisInput.type = "number"
   yAxisLabel.textContent = "Y-Achse"
   yAxisDiv.appendChild(yAxisLabel)
   yAxisDiv.appendChild(yAxisInput)
   objectDiv.appendChild(yAxisDiv)
   const zAxisDiv = document.createElement("div")
-  zAxisDiv.className = "axisDiv"
+  zAxisDiv.className = "parameterDiv"
   const zAxisInput = document.createElement("input")
   const zAxisLabel = document.createElement("label")
+  zAxisInput.type = "number"
   zAxisLabel.textContent = "Z-Achse"
   zAxisDiv.appendChild(zAxisLabel)
   zAxisDiv.appendChild(zAxisInput)
   objectDiv.appendChild(zAxisDiv)
+  const supportDiameterDiv = document.createElement("div")
+  supportDiameterDiv.className = "parameterDiv"
+  const supportDiameterLabel = document.createElement("label")
+  const supportDiameterInput = document.createElement("input")
+  supportDiameterInput.type = "number"
+  supportDiameterLabel.textContent = "Durchmesser der Stütze in mm"
+  supportDiameterDiv.appendChild(supportDiameterLabel)
+  supportDiameterDiv.appendChild(supportDiameterInput)
+  objectDiv.appendChild(supportDiameterDiv)
+  const edgeWidthDiv = document.createElement("div")
+  edgeWidthDiv.className = "parameterDiv"
+  const edgeWidthLabel = document.createElement("label")
+  const edgeWidthInput = document.createElement("input")
+  edgeWidthInput.type = "number"
+  edgeWidthLabel.textContent = "Breite des Randes in mm"
+  edgeWidthDiv.appendChild(edgeWidthLabel)
+  edgeWidthDiv.appendChild(edgeWidthInput)
+  objectDiv.appendChild(edgeWidthDiv)
+  const transitionWidthDiv = document.createElement("div")
+  transitionWidthDiv.className = "parameterDiv"
+  const transitionWidthLabel = document.createElement("label")
+  const transitionWidthInput = document.createElement("input")
+  transitionWidthInput.type = "number"
+  transitionWidthLabel.textContent = "Gewünschte Wandstärke in mm"
+  transitionWidthDiv.appendChild(transitionWidthLabel)
+  transitionWidthDiv.appendChild(transitionWidthInput)
+  objectDiv.appendChild(transitionWidthDiv)
+  const targetEdgeThicknessDiv = document.createElement("div")
+  targetEdgeThicknessDiv.className = "parameterDiv"
+  const targetEdgeThicknessLabel = document.createElement("label")
+  const targetEdgeThicknessInput = document.createElement("input")
+  targetEdgeThicknessInput.type = "number"
+  targetEdgeThicknessLabel.textContent = "Gewünschte Okklusalstärke in mm"
+  targetEdgeThicknessDiv.appendChild(targetEdgeThicknessLabel)
+  targetEdgeThicknessDiv.appendChild(targetEdgeThicknessInput)
+  objectDiv.appendChild(targetEdgeThicknessDiv)
+  const targetTopThicknessDiv = document.createElement("div")
+  targetTopThicknessDiv.className = "parameterDiv"
+  const targetTopThicknessLabel = document.createElement("label")
+  const targetTopThicknessInput = document.createElement("input")
+  targetTopThicknessInput.type = "number"
+  targetTopThicknessLabel.textContent = "Breite des Übergangs in mm"
+  targetTopThicknessDiv.appendChild(targetTopThicknessLabel)
+  targetTopThicknessDiv.appendChild(targetTopThicknessInput)
+  objectDiv.appendChild(targetTopThicknessDiv)
+  const finalFilenameDiv = document.createElement("div")
+  finalFilenameDiv.className = "parameterDiv"
+  const finalFilenameInput = document.createElement("Input")
+  const finalFilenameLabel = document.createElement("Label")
+  finalFilenameLabel.textContent = "Finaler Dateiname"
+  finalFilenameDiv.appendChild(finalFilenameLabel)
+  finalFilenameDiv.appendChild(finalFilenameInput)
+  objectDiv.appendChild(finalFilenameDiv)
 
   // gizmo button
   const gizmoButton = document.createElement('button');
