@@ -10,7 +10,7 @@ BABYLON.SceneLoader.RegisterPlugin(new STLFileLoader());
 const canvas = document.getElementById("renderCanvas") as HTMLCanvasElement;
 const engine = new BABYLON.Engine(canvas);
 const scene = new BABYLON.Scene(engine);
-const utilLayer = new BABYLON.UtilityLayerRenderer(scene); // utility layer for gizmos
+// const utilLayer = new BABYLON.UtilityLayerRenderer(scene); // utility layer for gizmos
 const fileInput = document.getElementById('fileInput') as HTMLInputElement; // input to upload files
 const selectedCoordinates: Record<string, [number, number, number][]> = {};
 const coordinateSpheres: Record<string, BABYLON.Mesh[]> = {};
@@ -30,7 +30,25 @@ const connection = new signalR.HubConnectionBuilder()
 
 // Functions //
 
-function uploadFileToServer(file: File, xAxisValue: string, yAxisValue: string, zAxisValue: string): void{
+// function uploadFileToServer(file: File, xAxisValue: string, yAxisValue: string, zAxisValue: string): void{
+//   const formData = new FormData();
+//   formData.append('file', file);
+
+//   fetch(`${fileServerAdress}/upload`, {
+//     method: "POST",
+//     body: formData
+//   })
+//   .then((res) => res.json())
+//   .then((response) => {
+//     console.log(response.filename, 'hochgeladen');   
+//     connection.invoke('NotifyBackendAboutFileUpload', response.filename, xAxisValue, yAxisValue, zAxisValue)
+//   })
+//   .catch((err) => console.log("Fehler beim Upload:", err));
+// };
+
+function requestScraping(file: File, message: Object){
+  console.log(message);
+  
   const formData = new FormData();
   formData.append('file', file);
 
@@ -40,11 +58,11 @@ function uploadFileToServer(file: File, xAxisValue: string, yAxisValue: string, 
   })
   .then((res) => res.json())
   .then((response) => {
-    console.log(response.filename, 'hochgeladen');   
-    connection.invoke('NotifyBackendAboutFileUpload', response.filename, xAxisValue, yAxisValue, zAxisValue)
+    console.log(response.filename, 'hochgeladen');
+    connection.invoke('RequestScraping', message);
   })
   .catch((err) => console.log("Fehler beim Upload:", err));
-};
+}
 
 async function downloadFileIntoScene(filename: string): Promise<File>{
   const response = await fetch(`${fileServerAdress}/download/${filename}`);
@@ -75,13 +93,13 @@ function addMeshToScene(file: File): void{
         meshes[0].id = file.name
         meshes[0].name = file.name
 
-        // gizmo
-        const positionGizmo = new BABYLON.PositionGizmo(utilLayer);
-        positionGizmo.attachedMesh = meshes[0]
-        const rotationGizmo = new BABYLON.RotationGizmo(utilLayer);
-        rotationGizmo.attachedMesh = meshes[0]
+        // // gizmo
+        // const positionGizmo = new BABYLON.PositionGizmo(utilLayer);
+        // positionGizmo.attachedMesh = meshes[0]
+        // const rotationGizmo = new BABYLON.RotationGizmo(utilLayer);
+        // rotationGizmo.attachedMesh = meshes[0]
         
-        createMeshInterface(file, meshes[0] as BABYLON.Mesh, positionGizmo, rotationGizmo)
+        createMeshInterface(file, meshes[0] as BABYLON.Mesh, /*positionGizmo, rotationGizmo*/)
         setupMeshInteraction(meshes[0] as BABYLON.Mesh)
       }, undefined, undefined, ".stl");
     }
@@ -90,44 +108,48 @@ function addMeshToScene(file: File): void{
   fileReader.readAsArrayBuffer(file);
 }
 
-function createMeshInterface(file: File, mesh: BABYLON.Mesh, positionGizmo: BABYLON.PositionGizmo, rotationGizmo: BABYLON.RotationGizmo): void {
+function createMeshInterface(file: File, mesh: BABYLON.Mesh, /*positionGizmo: BABYLON.PositionGizmo, rotationGizmo: BABYLON.RotationGizmo*/): void {
   const objectDiv = document.createElement('div');
   objectDiv.className = 'objectDiv';
   document.getElementById('interface')?.appendChild(objectDiv);
   
   // parameter inputs
-  const xAxisDiv = document.createElement("div")
-  xAxisDiv.className = "parameterDiv"
-  const xAxisInput = document.createElement("input")
-  const xAxisLabel = document.createElement("label")
-  xAxisInput.type = "number"
-  xAxisLabel.textContent = "X-Achse"
-  xAxisDiv.appendChild(xAxisLabel)
-  xAxisDiv.appendChild(xAxisInput)
-  objectDiv.appendChild(xAxisDiv)
-  const yAxisDiv = document.createElement("div")
-  yAxisDiv.className = "parameterDiv"
-  const yAxisInput = document.createElement("input")
-  const yAxisLabel = document.createElement("label")
-  yAxisInput.type = "number"
-  yAxisLabel.textContent = "Y-Achse"
-  yAxisDiv.appendChild(yAxisLabel)
-  yAxisDiv.appendChild(yAxisInput)
-  objectDiv.appendChild(yAxisDiv)
-  const zAxisDiv = document.createElement("div")
-  zAxisDiv.className = "parameterDiv"
-  const zAxisInput = document.createElement("input")
-  const zAxisLabel = document.createElement("label")
-  zAxisInput.type = "number"
-  zAxisLabel.textContent = "Z-Achse"
-  zAxisDiv.appendChild(zAxisLabel)
-  zAxisDiv.appendChild(zAxisInput)
-  objectDiv.appendChild(zAxisDiv)
+  // const xAxisDiv = document.createElement("div")
+  // xAxisDiv.className = "parameterDiv"
+  // const xAxisInput = document.createElement("input")
+  // const xAxisLabel = document.createElement("label")
+  // xAxisInput.type = "number"
+  // xAxisInput.id = "xAxisInput"
+  // xAxisLabel.textContent = "X-Achse"
+  // xAxisDiv.appendChild(xAxisLabel)
+  // xAxisDiv.appendChild(xAxisInput)
+  // objectDiv.appendChild(xAxisDiv)
+  // const yAxisDiv = document.createElement("div")
+  // yAxisDiv.className = "parameterDiv"
+  // const yAxisInput = document.createElement("input")
+  // const yAxisLabel = document.createElement("label")
+  // yAxisInput.type = "number"
+  // yAxisInput.id = "yAxisInput"
+  // yAxisLabel.textContent = "Y-Achse"
+  // yAxisDiv.appendChild(yAxisLabel)
+  // yAxisDiv.appendChild(yAxisInput)
+  // objectDiv.appendChild(yAxisDiv)
+  // const zAxisDiv = document.createElement("div")
+  // zAxisDiv.className = "parameterDiv"
+  // const zAxisInput = document.createElement("input")
+  // const zAxisLabel = document.createElement("label")
+  // zAxisInput.type = "number"
+  // zAxisInput.id = "zAxisInput"
+  // zAxisLabel.textContent = "Z-Achse"
+  // zAxisDiv.appendChild(zAxisLabel)
+  // zAxisDiv.appendChild(zAxisInput)
+  // objectDiv.appendChild(zAxisDiv)
   const supportDiameterDiv = document.createElement("div")
   supportDiameterDiv.className = "parameterDiv"
   const supportDiameterLabel = document.createElement("label")
   const supportDiameterInput = document.createElement("input")
   supportDiameterInput.type = "number"
+  supportDiameterInput.id = "supportDiameterInput"
   supportDiameterLabel.textContent = "Durchmesser der Stütze in mm"
   supportDiameterDiv.appendChild(supportDiameterLabel)
   supportDiameterDiv.appendChild(supportDiameterInput)
@@ -137,6 +159,7 @@ function createMeshInterface(file: File, mesh: BABYLON.Mesh, positionGizmo: BABY
   const edgeWidthLabel = document.createElement("label")
   const edgeWidthInput = document.createElement("input")
   edgeWidthInput.type = "number"
+  edgeWidthInput.id = "edgeWidthInput"
   edgeWidthLabel.textContent = "Breite des Randes in mm"
   edgeWidthDiv.appendChild(edgeWidthLabel)
   edgeWidthDiv.appendChild(edgeWidthInput)
@@ -146,52 +169,56 @@ function createMeshInterface(file: File, mesh: BABYLON.Mesh, positionGizmo: BABY
   const transitionWidthLabel = document.createElement("label")
   const transitionWidthInput = document.createElement("input")
   transitionWidthInput.type = "number"
+  transitionWidthInput.id = "transitionWidthInput"
   transitionWidthLabel.textContent = "Gewünschte Wandstärke in mm"
   transitionWidthDiv.appendChild(transitionWidthLabel)
   transitionWidthDiv.appendChild(transitionWidthInput)
   objectDiv.appendChild(transitionWidthDiv)
-  const targetEdgeThicknessDiv = document.createElement("div")
-  targetEdgeThicknessDiv.className = "parameterDiv"
-  const targetEdgeThicknessLabel = document.createElement("label")
-  const targetEdgeThicknessInput = document.createElement("input")
-  targetEdgeThicknessInput.type = "number"
-  targetEdgeThicknessLabel.textContent = "Gewünschte Okklusalstärke in mm"
-  targetEdgeThicknessDiv.appendChild(targetEdgeThicknessLabel)
-  targetEdgeThicknessDiv.appendChild(targetEdgeThicknessInput)
-  objectDiv.appendChild(targetEdgeThicknessDiv)
+  const targetWallThicknessDiv = document.createElement("div")
+  targetWallThicknessDiv.className = "parameterDiv"
+  const targetWallThicknessLabel = document.createElement("label")
+  const targetWallThicknessInput = document.createElement("input")
+  targetWallThicknessInput.type = "number"
+  targetWallThicknessInput.id = "targetWallThicknessInput"
+  targetWallThicknessLabel.textContent = "Gewünschte Okklusalstärke in mm"
+  targetWallThicknessDiv.appendChild(targetWallThicknessLabel)
+  targetWallThicknessDiv.appendChild(targetWallThicknessInput)
+  objectDiv.appendChild(targetWallThicknessDiv)
   const targetTopThicknessDiv = document.createElement("div")
   targetTopThicknessDiv.className = "parameterDiv"
   const targetTopThicknessLabel = document.createElement("label")
   const targetTopThicknessInput = document.createElement("input")
   targetTopThicknessInput.type = "number"
+  targetTopThicknessInput.id = "targetTopThicknessInput"
   targetTopThicknessLabel.textContent = "Breite des Übergangs in mm"
   targetTopThicknessDiv.appendChild(targetTopThicknessLabel)
   targetTopThicknessDiv.appendChild(targetTopThicknessInput)
   objectDiv.appendChild(targetTopThicknessDiv)
   const finalFilenameDiv = document.createElement("div")
   finalFilenameDiv.className = "parameterDiv"
-  const finalFilenameInput = document.createElement("Input")
-  const finalFilenameLabel = document.createElement("Label")
+  const finalFilenameInput = document.createElement("input")
+  const finalFilenameLabel = document.createElement("label")
+  finalFilenameInput.id = "finalFilenameInput"
   finalFilenameLabel.textContent = "Finaler Dateiname"
   finalFilenameDiv.appendChild(finalFilenameLabel)
   finalFilenameDiv.appendChild(finalFilenameInput)
   objectDiv.appendChild(finalFilenameDiv)
 
   // gizmo button
-  const gizmoButton = document.createElement('button');
-  gizmoButton.textContent = 'toggle gizmo';
-  gizmoButton.className = 'gizmoBtn';
-  gizmoButton.onclick = () => {
-    if (rotationGizmo.attachedMesh && positionGizmo.attachedMesh){
-      rotationGizmo.attachedMesh = null;
-      positionGizmo.attachedMesh = null;
-    }
-    else {
-      rotationGizmo.attachedMesh = mesh;
-      positionGizmo.attachedMesh = mesh;
-    }
-  };
-  objectDiv.appendChild(gizmoButton);
+  // const gizmoButton = document.createElement('button');
+  // gizmoButton.textContent = 'toggle gizmo';
+  // gizmoButton.className = 'gizmoBtn';
+  // gizmoButton.onclick = () => {
+  //   if (rotationGizmo.attachedMesh && positionGizmo.attachedMesh){
+  //     rotationGizmo.attachedMesh = null;
+  //     positionGizmo.attachedMesh = null;
+  //   }
+  //   else {
+  //     rotationGizmo.attachedMesh = mesh;
+  //     positionGizmo.attachedMesh = mesh;
+  //   }
+  // };
+  // objectDiv.appendChild(gizmoButton);
   
     // remove button
   const deleteButton = document.createElement('button');
@@ -207,18 +234,34 @@ function createMeshInterface(file: File, mesh: BABYLON.Mesh, positionGizmo: BABY
       delete selectedCoordinates[mesh.id]
     }
     mesh.dispose();
-    positionGizmo.dispose();
-    rotationGizmo.dispose();
+    // positionGizmo.dispose();
+    // rotationGizmo.dispose();
     document.getElementById('interface')?.removeChild(objectDiv);
   };
   objectDiv.appendChild(deleteButton);
 
-  // upload button
-  const uploadButton = document.createElement('button');
-  uploadButton.textContent = `${file.name} Hochladen`;
-  uploadButton.className = 'uploadBtn';
-  uploadButton.onclick = () => {uploadFileToServer(file, xAxisInput.value, yAxisInput.value, zAxisInput.value)};
-  objectDiv.appendChild(uploadButton);
+  // scrape button
+  const scrapeButton = document.createElement('button');
+  scrapeButton.textContent = `${file.name} auskratzen`;
+  scrapeButton.className = 'uploadBtn'; 
+  scrapeButton.onclick = () => {requestScraping(file, {
+    selections: selectedCoordinates[file.name],
+    supportDiameter: supportDiameterInput.value as unknown as number,
+    edgeWidth: edgeWidthInput.value as unknown as number,
+    transitionWidth: transitionWidthInput.value as unknown as number,
+    targetWallThickness: targetWallThicknessInput.value as unknown as number,
+    targetTopThickness: targetTopThicknessInput.value as unknown as number,
+    fileToUse: file.name,
+    finalFilename: finalFilenameInput.value
+  })};
+  objectDiv.appendChild(scrapeButton);
+
+  // // upload button
+  // const uploadButton = document.createElement('button');
+  // uploadButton.textContent = `${file.name} Hochladen`;
+  // uploadButton.className = 'uploadBtn';
+  // uploadButton.onclick = () => {uploadFileToServer(file, xAxisInput.value, yAxisInput.value, zAxisInput.value)};
+  // objectDiv.appendChild(uploadButton);
 
   // download link
   const downloadButton = document.createElement('button');

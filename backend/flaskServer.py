@@ -79,12 +79,16 @@ def handle_transform(data):
     except Exception as e:
         print("Fehler bei der Transformation:", str(e))
 
+def handle_scraping(data):
+    print(data)
+
 def connect_with_retry():
     while True:
         try:
             hub_connection = HubConnectionBuilder().with_url('http://localhost:5500/myhub').build()
             hub_connection.on('CheckConnection', check_connection)
             hub_connection.on('FileUploaded', handle_transform)
+            hub_connection.on('NewScrapingTask', handle_scraping)
             hub_connection.start()
             print("verbunden")
             time.sleep(1)
