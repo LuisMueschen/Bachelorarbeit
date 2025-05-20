@@ -202,7 +202,7 @@ function createMeshInterface(file: File, mesh: BABYLON.Mesh, /*positionGizmo: BA
   const finalFilenameInput = document.createElement("input")
   const finalFilenameLabel = document.createElement("label")
   finalFilenameInput.id = "finalFilenameInput"
-  finalFilenameInput.value = `bearbeitet_${file.name}`
+  finalFilenameInput.value = file.name
   finalFilenameLabel.textContent = "Finaler Dateiname"
   finalFilenameDiv.appendChild(finalFilenameLabel)
   finalFilenameDiv.appendChild(finalFilenameInput)

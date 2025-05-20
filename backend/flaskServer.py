@@ -91,6 +91,7 @@ def handle_scraping(data):
     final_filename = data[0]['finalFilename']
     file_to_use = f'uploads/{file_to_use}'
     final_filename = f'uploads/{final_filename}'
+    connection_id = data[0]["connectionID"]
     print(selections)
     print(support_diameter)
     print(edge_width)
@@ -118,6 +119,7 @@ def handle_scraping(data):
             transition_width,
             final_filename
         )
+        hub_connection.send("NotifyFrontendAboutManipulatedMesh", [data[0]["finalFilename"], connection_id])
     except Exception as e:
         print(e)
 

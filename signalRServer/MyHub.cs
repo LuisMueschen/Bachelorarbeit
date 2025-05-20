@@ -44,7 +44,15 @@ public class MyHub : Hub
 
     public async Task RequestScraping(TaskMessage message)
     {
-        Console.WriteLine("Auskratzen mit folgenden Parametern angefordert: \n" + message);
+        Console.WriteLine("Auskratzen mit folgenden Parametern angefordert: \n" +
+            message.selections + "\n" +
+            message.supportDiameter + "\n" +
+            message.edgeWidth + "\n" +
+            message.transitionWidth + "\n" +
+            message.targetTopThickness + "\n" +
+            message.fileToUse + "\n" +
+            message.finalFilename + "\n"
+        );
         await Clients.Group("backend").SendAsync("NewScrapingTask", new
         {
             selections = message.selections,
@@ -54,7 +62,8 @@ public class MyHub : Hub
             targetWallThickness = message.targetWallThickness,
             targetTopThickness = message.targetTopThickness,
             fileToUse = message.fileToUse,
-            finalFilename = message.finalFilename
+            finalFilename = message.finalFilename,
+            connectionID = Context.ConnectionId
         });
     }
 

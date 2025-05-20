@@ -14,7 +14,7 @@ import configparser
 import logging
 import tempfile
 import copy
-import vtk
+# import vtk
 import pyoctree
 import openmesh as om
 import numpy as np
@@ -30,106 +30,106 @@ DICHTE_GOLD_G_MM_3 = 1.0/51.86
 NR_UNTERTEILUNGS_ITERATIONEN = 1
 
 
-def positionen_markieren(eingabe_datei_name, punkte_datei_name):
-    """ Interaktives Markieren der relevanten posiitionen mit VTK
+# def positionen_markieren(eingabe_datei_name, punkte_datei_name):
+#     """ Interaktives Markieren der relevanten posiitionen mit VTK
 
-        Zunaechst wird die Mitte der gewuenschten Position der
-        Stuetze markiert, anschliessend dann ein Punkt auf der
-        Innenseite der Oeffnung nahe am Rand. Die Punkte werden
-        in einer Datei gespeichert.
+#         Zunaechst wird die Mitte der gewuenschten Position der
+#         Stuetze markiert, anschliessend dann ein Punkt auf der
+#         Innenseite der Oeffnung nahe am Rand. Die Punkte werden
+#         in einer Datei gespeichert.
 
-        Args:
-            eingabe_datei_name (string): Name der STL-Datei
-            punkte_datei_name (string): Name der Ausgabe-Datei
-    """
-    point_list = []
-    reader = vtk.vtkSTLReader()
-    reader.SetFileName(eingabe_datei_name)
-    reader.Update()
-    poly_data = reader.GetOutput()
-    mapper = vtk.vtkPolyDataMapper()
-    mapper.SetInputData(poly_data)
-    actor = vtk.vtkActor()
-    actor.SetMapper(mapper)
-    ren = vtk.vtkRenderer()
-    ren.SetBackground(0.2, 0.2, 0.2)
-    ren.AddActor(actor)
-    renWin = vtk.vtkRenderWindow()
-    renWin.FullScreenOn()
-    renWin.BordersOn()
-    renWin.SetWindowName('Positionen definieren')
-    renWin.AddRenderer(ren)
-    iren = vtk.vtkRenderWindowInteractor()
-    iren.SetInteractorStyle(vtk.vtkInteractorStyleTrackballCamera())
+#         Args:
+#             eingabe_datei_name (string): Name der STL-Datei
+#             punkte_datei_name (string): Name der Ausgabe-Datei
+#     """
+#     point_list = []
+#     reader = vtk.vtkSTLReader()
+#     reader.SetFileName(eingabe_datei_name)
+#     reader.Update()
+#     poly_data = reader.GetOutput()
+#     mapper = vtk.vtkPolyDataMapper()
+#     mapper.SetInputData(poly_data)
+#     actor = vtk.vtkActor()
+#     actor.SetMapper(mapper)
+#     ren = vtk.vtkRenderer()
+#     ren.SetBackground(0.2, 0.2, 0.2)
+#     ren.AddActor(actor)
+#     renWin = vtk.vtkRenderWindow()
+#     renWin.FullScreenOn()
+#     renWin.BordersOn()
+#     renWin.SetWindowName('Positionen definieren')
+#     renWin.AddRenderer(ren)
+#     iren = vtk.vtkRenderWindowInteractor()
+#     iren.SetInteractorStyle(vtk.vtkInteractorStyleTrackballCamera())
 
-    sphere_actor_list = []
+#     sphere_actor_list = []
 
-    def kugel_hinzufuegen(pick_pos, scalar_value):
-        dataSet = vtk.vtkUnstructuredGrid()
-        points = vtk.vtkPoints()
-        scalars = vtk.vtkFloatArray()
-        dataSet.SetPoints(points)
-        dataSet.GetPointData().SetScalars(scalars)
-        points.InsertNextPoint(pick_pos)
-        scalars.InsertNextValue(scalar_value)
-        # Kugeln als Symbole
-        sphere = vtk.vtkSphereSource()
-        sphere.SetPhiResolution(20)
-        sphere.SetThetaResolution(20)
-        glyph = vtk.vtkGlyph3D()
-        glyph.SetSourceConnection(sphere.GetOutputPort())
-        glyph.SetInputData(dataSet)
-        glyph.SetScaleModeToScaleByScalar()
-        sphere_mapper = vtk.vtkPolyDataMapper()
-        sphere_mapper.SetInputConnection(glyph.GetOutputPort())
-        sphere_mapper.SetScalarRange(0, 1)
-        sphere_actor = vtk.vtkActor()
-        sphere_actor.SetMapper(sphere_mapper)
-        ren.AddActor(sphere_actor)
-        sphere_actor_list.append(sphere_actor)
-    picker = vtk.vtkCellPicker()
-    pick_color = 0.0
+#     def kugel_hinzufuegen(pick_pos, scalar_value):
+#         dataSet = vtk.vtkUnstructuredGrid()
+#         points = vtk.vtkPoints()
+#         scalars = vtk.vtkFloatArray()
+#         dataSet.SetPoints(points)
+#         dataSet.GetPointData().SetScalars(scalars)
+#         points.InsertNextPoint(pick_pos)
+#         scalars.InsertNextValue(scalar_value)
+#         # Kugeln als Symbole
+#         sphere = vtk.vtkSphereSource()
+#         sphere.SetPhiResolution(20)
+#         sphere.SetThetaResolution(20)
+#         glyph = vtk.vtkGlyph3D()
+#         glyph.SetSourceConnection(sphere.GetOutputPort())
+#         glyph.SetInputData(dataSet)
+#         glyph.SetScaleModeToScaleByScalar()
+#         sphere_mapper = vtk.vtkPolyDataMapper()
+#         sphere_mapper.SetInputConnection(glyph.GetOutputPort())
+#         sphere_mapper.SetScalarRange(0, 1)
+#         sphere_actor = vtk.vtkActor()
+#         sphere_actor.SetMapper(sphere_mapper)
+#         ren.AddActor(sphere_actor)
+#         sphere_actor_list.append(sphere_actor)
+#     picker = vtk.vtkCellPicker()
+#     pick_color = 0.0
 
-    def save_pick(object, event):
-        """ Position der interaktiven Kugel auslesen und speichern """
-        nonlocal pick_color, picker
-        if picker.GetPointId() >= 0:
-            pick_pos = picker.GetPickPosition()
-            kugel_hinzufuegen(pick_pos, 0.25)
-            point_list.append((pick_pos[0], pick_pos[1], pick_pos[2]))
-            renWin.Render()
+#     def save_pick(object, event):
+#         """ Position der interaktiven Kugel auslesen und speichern """
+#         nonlocal pick_color, picker
+#         if picker.GetPointId() >= 0:
+#             pick_pos = picker.GetPickPosition()
+#             kugel_hinzufuegen(pick_pos, 0.25)
+#             point_list.append((pick_pos[0], pick_pos[1], pick_pos[2]))
+#             renWin.Render()
 
-    # Nach der Interaktion wird die Funktion save_pick aufgerufen
-    picker.AddObserver("EndPickEvent", save_pick)
-    iren.SetPicker(picker)
+#     # Nach der Interaktion wird die Funktion save_pick aufgerufen
+#     picker.AddObserver("EndPickEvent", save_pick)
+#     iren.SetPicker(picker)
 
-    # Tastendruck verarbeiten
-    def tastatur_interaktion(obj, ev):
-        key = obj.GetKeySym()
-        if key in ('u', 'U'):
-            if point_list:
-                point_list.pop()
-                ren.RemoveActor(sphere_actor_list[-1])
-                sphere_actor_list.pop()
-                renWin.Render()
-        elif key in ('q', 'Q'):
-            renWin.Finalize()
-            iren.TerminateApp()
+#     # Tastendruck verarbeiten
+#     def tastatur_interaktion(obj, ev):
+#         key = obj.GetKeySym()
+#         if key in ('u', 'U'):
+#             if point_list:
+#                 point_list.pop()
+#                 ren.RemoveActor(sphere_actor_list[-1])
+#                 sphere_actor_list.pop()
+#                 renWin.Render()
+#         elif key in ('q', 'Q'):
+#             renWin.Finalize()
+#             iren.TerminateApp()
 
-    iren.AddObserver('KeyPressEvent', tastatur_interaktion)
+#     iren.AddObserver('KeyPressEvent', tastatur_interaktion)
 
-    iren.SetRenderWindow(renWin)
-    ren.AddActor(actor)
-    iren.Initialize()
-    renWin.Render()
-    iren.Start()
-    with open(punkte_datei_name, 'w') as punkte_datei:
-        for point in point_list:
-            for coord in point:
-                punkte_datei.write(str(coord) + ' ')
-            punkte_datei.write('\n')
-    punkte_str = str(np.array(point_list, dtype=np.float32))
-    logging.info(f'{len(point_list)} Punkte ausgewaehlt:\n{punkte_str}')
+#     iren.SetRenderWindow(renWin)
+#     ren.AddActor(actor)
+#     iren.Initialize()
+#     renWin.Render()
+#     iren.Start()
+#     with open(punkte_datei_name, 'w') as punkte_datei:
+#         for point in point_list:
+#             for coord in point:
+#                 punkte_datei.write(str(coord) + ' ')
+#             punkte_datei.write('\n')
+#     punkte_str = str(np.array(point_list, dtype=np.float32))
+#     logging.info(f'{len(point_list)} Punkte ausgewaehlt:\n{punkte_str}')
 
 
 def stl_ausrichtung_und_vermessung(eingabe_datei_name,
@@ -152,7 +152,7 @@ def stl_ausrichtung_und_vermessung(eingabe_datei_name,
                                   remove_empty_areas=True,
                                   remove_duplicate_polygons=True)
     except FileNotFoundError:
-        print(f'Datei {eingabe_date_name_name} nicht gefunden')
+        print(f'Datei {eingabe_datei_name} nicht gefunden')
         exit(-1)
     volumen, schwerpunkt, achsen = mesh.get_mass_properties()
     if ausgabe_datei_name is not None:
@@ -237,6 +237,7 @@ class Krone:
             logging.debug(f'Datei {stl_datei_name} '
                           f'mit {len(self.mesh.points())} Punkten gelesen')
         self.status_update(ausgabe)
+        print("Krone erstellt")
 
     def status_update(self, ausgabe):
         self.mesh.update_normals()
@@ -388,16 +389,18 @@ class Krone:
                         c = self.mesh.calc_face_centroid(f)
                         dist = abs(self.ebene_occ.distanz(c))
                         if dist <= self.occ_radius:
-                            zu_bearbeiten.add(f)
+                            zu_bearbeiten.add(f_idx)
                             queue.append(f)
             logging.debug(f'{len(zu_bearbeiten)} Dreiecke zu unterteilen')
 
-            for f_handle in zu_bearbeiten:
+            for f_idx in zu_bearbeiten:
+                f_handle = self.mesh.face_handle(f_idx)
                 c = self.mesh.calc_face_centroid(f_handle)
-                c_handle = self.mesh.split(f_handle, c)
+                # c_handle = self.mesh.split(f_handle, c)
                 neue_vertices += 1
             logging.info(f'{neue_vertices} Ecken im Innenteil hinzugefuegt')
             self.status_update(ausgabe=False)
+            print("Krone unterteilt")
 
     def verschiebungs_richtung(self, v_handle, stuetzen_durchmesser_mm):
         """
@@ -516,6 +519,7 @@ class Krone:
         #
         # octree fuer die Schnittpunktsberechnung aktualisieren
         self.update_octree()
+        print("krone geschrumpft")
 
     def auskratzen(self, stuetzen_durchmesser_mm,
                    rand_breite_mm, seiten_dicke_mm, okklusal_dicke_mm,
@@ -579,6 +583,7 @@ class Krone:
                     v_betraege[v_idx] = verschiebung
                 else:
                     octree_fehler_menge.add(v_idx)
+            print("hier gehts")
             # Nachbarn speichern
             for v in self.mesh.vv(v_handle):
                 v_idx = v.idx()
@@ -661,7 +666,7 @@ def modell_auskratzen(stl_datei_name_eingabe, punkte_datei_name,
             stl_datei_name_ausgabe (string): Name, unter der das
                 Ergebnis gespeichert werden soll
     """
-
+    print("auskratzen gestartet")
     # Kronen-Instanz zum verschieben der Aussen-Huelle
     krone_skaliert = Krone(stl_datei_name_eingabe, punkte_datei_name)
     #
@@ -742,7 +747,7 @@ def auskratzen_main():
     #
     punkte_datei_name = '/tmp/tmpaosx1qa5.txt'
     punkte_datei_name = temp_datei_name('txt')
-    positionen_markieren(stl_korrigiert_datei_name, punkte_datei_name)
+    # positionen_markieren(stl_korrigiert_datei_name, punkte_datei_name)
     #
     stuetzen_durchmesser_mm = config.getfloat('DEFAULT',
                                               'stuetzen_durchmesser_mm')
