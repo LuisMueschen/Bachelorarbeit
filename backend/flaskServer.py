@@ -7,6 +7,7 @@ from flask import Flask, request, jsonify, send_from_directory, abort
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 import threading
+import auskratzen
 
 app = Flask(__name__)
 CORS(app)
@@ -80,7 +81,49 @@ def handle_transform(data):
         print("Fehler bei der Transformation:", str(e))
 
 def handle_scraping(data):
-    print(data)
+    selections = data[0]['selections']
+    support_diameter = float(data[0]['supportDiameter'])
+    edge_width = float(data[0]['edgeWidth'])
+    transition_width = float(data[0]['transitionWidth'])
+    target_wall_thickness = float(data[0]['targetWallThickness'])
+    target_top_thickness = float(data[0]['targetTopThickness'])
+    file_to_use = data[0]['fileToUse']
+    final_filename = data[0]['finalFilename']
+    file_to_use = f'uploads/{file_to_use}'
+    final_filename = f'uploads/{final_filename}'
+    print(selections)
+    print(support_diameter)
+    print(edge_width)
+    print(transition_width)
+    print(target_wall_thickness)
+    print(target_top_thickness)
+    print(file_to_use)
+    print(final_filename)
+
+    point_file_name = "./points.txt"
+
+    with open(point_file_name, "w") as file:
+        for point in selections:
+            line = " ".join(map(str, point))
+            file.write(line + "\n")
+
+    try:
+        auskratzen.modell_auskratzen(
+            file_to_use,
+            point_file_name,
+            support_diameter,
+            edge_width,
+            target_wall_thickness,
+            target_top_thickness,
+            transition_width,
+            final_filename
+        )
+    except Exception as e:
+        print(e)
+
+    os.remove(point_file_name)
+    print("done")
+    
 
 def connect_with_retry():
     while True:

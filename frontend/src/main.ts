@@ -46,9 +46,7 @@ const connection = new signalR.HubConnectionBuilder()
 //   .catch((err) => console.log("Fehler beim Upload:", err));
 // };
 
-function requestScraping(file: File, message: Object){
-  console.log(message);
-  
+function requestScraping(file: File, message: Object){  
   const formData = new FormData();
   formData.append('file', file);
 
@@ -149,6 +147,7 @@ function createMeshInterface(file: File, mesh: BABYLON.Mesh, /*positionGizmo: BA
   const supportDiameterLabel = document.createElement("label")
   const supportDiameterInput = document.createElement("input")
   supportDiameterInput.type = "number"
+  supportDiameterInput.value = "1.5"
   supportDiameterInput.id = "supportDiameterInput"
   supportDiameterLabel.textContent = "Durchmesser der Stütze in mm"
   supportDiameterDiv.appendChild(supportDiameterLabel)
@@ -159,6 +158,7 @@ function createMeshInterface(file: File, mesh: BABYLON.Mesh, /*positionGizmo: BA
   const edgeWidthLabel = document.createElement("label")
   const edgeWidthInput = document.createElement("input")
   edgeWidthInput.type = "number"
+  edgeWidthInput.value = "2"
   edgeWidthInput.id = "edgeWidthInput"
   edgeWidthLabel.textContent = "Breite des Randes in mm"
   edgeWidthDiv.appendChild(edgeWidthLabel)
@@ -169,6 +169,7 @@ function createMeshInterface(file: File, mesh: BABYLON.Mesh, /*positionGizmo: BA
   const transitionWidthLabel = document.createElement("label")
   const transitionWidthInput = document.createElement("input")
   transitionWidthInput.type = "number"
+  transitionWidthInput.value = "1"
   transitionWidthInput.id = "transitionWidthInput"
   transitionWidthLabel.textContent = "Gewünschte Wandstärke in mm"
   transitionWidthDiv.appendChild(transitionWidthLabel)
@@ -179,6 +180,7 @@ function createMeshInterface(file: File, mesh: BABYLON.Mesh, /*positionGizmo: BA
   const targetWallThicknessLabel = document.createElement("label")
   const targetWallThicknessInput = document.createElement("input")
   targetWallThicknessInput.type = "number"
+  targetWallThicknessInput.value = "0.3"
   targetWallThicknessInput.id = "targetWallThicknessInput"
   targetWallThicknessLabel.textContent = "Gewünschte Okklusalstärke in mm"
   targetWallThicknessDiv.appendChild(targetWallThicknessLabel)
@@ -189,6 +191,7 @@ function createMeshInterface(file: File, mesh: BABYLON.Mesh, /*positionGizmo: BA
   const targetTopThicknessLabel = document.createElement("label")
   const targetTopThicknessInput = document.createElement("input")
   targetTopThicknessInput.type = "number"
+  targetTopThicknessInput.value = "0.5"
   targetTopThicknessInput.id = "targetTopThicknessInput"
   targetTopThicknessLabel.textContent = "Breite des Übergangs in mm"
   targetTopThicknessDiv.appendChild(targetTopThicknessLabel)
@@ -199,6 +202,7 @@ function createMeshInterface(file: File, mesh: BABYLON.Mesh, /*positionGizmo: BA
   const finalFilenameInput = document.createElement("input")
   const finalFilenameLabel = document.createElement("label")
   finalFilenameInput.id = "finalFilenameInput"
+  finalFilenameInput.value = `bearbeitet_${file.name}`
   finalFilenameLabel.textContent = "Finaler Dateiname"
   finalFilenameDiv.appendChild(finalFilenameLabel)
   finalFilenameDiv.appendChild(finalFilenameInput)
@@ -361,6 +365,10 @@ fileInput.addEventListener('change', async (event: Event) => {
     addMeshToScene(file)
   }
 });
+
+window.addEventListener("resize", () => {
+  engine.resize()
+})
 
 connection.onreconnecting(() => console.log("Verbindung verloren"))
 

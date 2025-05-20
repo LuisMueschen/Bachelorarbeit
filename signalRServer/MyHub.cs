@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 
 public class TaskMessage
 {
-    public float[][] selections { get; set; }
+    public required float[][] selections { get; set; }
     public required string supportDiameter { get; set; }
     public required string edgeWidth { get; set; }
     public required string transitionWidth { get; set; }
@@ -49,7 +49,7 @@ public class MyHub : Hub
         {
             selections = message.selections,
             supportDiameter = message.supportDiameter,
-            edgeWith = message.edgeWidth,
+            edgeWidth = message.edgeWidth,
             transitionWidth = message.transitionWidth,
             targetWallThickness = message.targetWallThickness,
             targetTopThickness = message.targetTopThickness,
