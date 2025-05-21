@@ -583,7 +583,6 @@ class Krone:
                     v_betraege[v_idx] = verschiebung
                 else:
                     octree_fehler_menge.add(v_idx)
-            print("hier gehts")
             # Nachbarn speichern
             for v in self.mesh.vv(v_handle):
                 v_idx = v.idx()

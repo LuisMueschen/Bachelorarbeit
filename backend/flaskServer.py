@@ -41,10 +41,12 @@ def download_file(filename):
 
 hub_connection = None
 
+# debug event
 def check_connection(args):
     print("message received: " + args[0])
     hub_connection.send("SendToFrontend", ["Hello Frontend!"])
 
+# proof of concept event
 def handle_transform(data):
     # Empfängt Mesh-Daten vom Frontend, transformiert das Modell und sendet es zurück.
     file_name = data[0]
@@ -80,6 +82,7 @@ def handle_transform(data):
     except Exception as e:
         print("Fehler bei der Transformation:", str(e))
 
+# scraping event 
 def handle_scraping(data):
     selections = data[0]['selections']
     support_diameter = float(data[0]['supportDiameter'])
@@ -101,8 +104,9 @@ def handle_scraping(data):
     print(file_to_use)
     print(final_filename)
 
-    point_file_name = "./points.txt"
 
+    # creating temporary point file
+    point_file_name = "./points.txt"
     with open(point_file_name, "w") as file:
         for point in selections:
             line = " ".join(map(str, point))
@@ -122,12 +126,14 @@ def handle_scraping(data):
         hub_connection.send("NotifyFrontendAboutManipulatedMesh", [data[0]["finalFilename"], connection_id])
     except Exception as e:
         print(e)
-
+    
+    # deleting temporary point file
     os.remove(point_file_name)
     print("done")
     
 
 def connect_with_retry():
+    # creating signalR client and trying to connect to ASP.NET till connection is established
     while True:
         try:
             hub_connection = HubConnectionBuilder().with_url('http://localhost:5500/myhub').build()
@@ -137,6 +143,7 @@ def connect_with_retry():
             hub_connection.start()
             print("verbunden")
             time.sleep(1)
+            # registering for group "backend"
             hub_connection.send("register", ["backend"])
             return hub_connection
         except:
@@ -147,6 +154,7 @@ def start_signalR_client():
     global hub_connection
     hub_connection = connect_with_retry()
 
+    # sending regular ping to check if client is connected, if connection is lost, new try to connect
     while True:
         try:
             hub_connection.send("ping", [])
@@ -160,6 +168,7 @@ def start_signalR_client():
         time.sleep(5)    
 
 if __name__ == "__main__":
+    # creating new thread to run signalR client parallel to flask
     signalR_thread = threading.Thread(target=start_signalR_client)
     signalR_thread.daemon = True
     signalR_thread.start()

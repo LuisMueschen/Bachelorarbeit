@@ -19,7 +19,7 @@ builder.Services.AddCors(options =>
 // SignalR-Dienste registrieren
 builder.Services.AddSignalR();
 
-builder.WebHost.UseUrls("http://localhost:5500"); // Port festlegen
+builder.WebHost.UseUrls("http://localhost:5500");
 
 var app = builder.Build();
 

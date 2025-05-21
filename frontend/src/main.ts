@@ -10,15 +10,22 @@ BABYLON.SceneLoader.RegisterPlugin(new STLFileLoader());
 const canvas = document.getElementById("renderCanvas") as HTMLCanvasElement;
 const engine = new BABYLON.Engine(canvas);
 const scene = new BABYLON.Scene(engine);
-const utilLayer = new BABYLON.UtilityLayerRenderer(scene); // utility layer for gizmos
-const fileInput = document.getElementById('fileInput') as HTMLInputElement; // input to upload files
+
+// utility layer for gizmos
+const utilLayer = new BABYLON.UtilityLayerRenderer(scene);
+
+// html input to upload files
+const fileInput = document.getElementById('fileInput') as HTMLInputElement;
+
+// Dictionarys containing sphere meshes and coordinates for selections
 const selectedCoordinates: Record<string, [number, number, number][]> = {};
 const coordinateSpheres: Record<string, BABYLON.Mesh[]> = {};
 
+// Server adresses
 const dotnetAdress = 'http://localhost:5500/myhub'
-// const dotnetAdress = processenv.processenv('dotnetAdress','http://localhost:5500/myhub') as string
 const fileServerAdress = 'http://localhost:5000'
 
+// Connection to ASP.NET Server
 const connection = new signalR.HubConnectionBuilder()
     .withUrl(dotnetAdress)
     .withAutomaticReconnect({
@@ -29,6 +36,8 @@ const connection = new signalR.HubConnectionBuilder()
     .build();
 
 // Functions //
+
+// Old function for streching proof of concept
 
 // function uploadFileToServer(file: File, xAxisValue: string, yAxisValue: string, zAxisValue: string): void{
 //   const formData = new FormData();
@@ -46,11 +55,14 @@ const connection = new signalR.HubConnectionBuilder()
 //   .catch((err) => console.log("Fehler beim Upload:", err));
 // };
 
+
 function requestScraping(file: File, message: Object){  
   const formData = new FormData();
   formData.append('file', file);
 
+  // Checking if exactly 5 points are selected
   if(selectedCoordinates[file.name] && selectedCoordinates[file.name].length === 5){
+    // Uploading file to manipulate
     fetch(`${fileServerAdress}/upload`, {
       method: "POST",
       body: formData
@@ -58,15 +70,16 @@ function requestScraping(file: File, message: Object){
     .then((res) => res.json())
     .then((response) => {
       console.log(response.filename, 'hochgeladen');
+      // Inform Backend about Upload and request execution of scraping script
       connection.invoke('RequestScraping', message);
     })
     .catch((err) => console.log("Fehler beim Upload:", err));
   }else{
     alert("Bitte wähle genau 5 Punkte aus")
   }
-
 }
 
+// Downloading a File from Backend and turning it into file object
 async function downloadFileIntoScene(filename: string): Promise<File>{
   const response = await fetch(`${fileServerAdress}/download/${filename}`);
   if(!response.ok){
@@ -80,6 +93,7 @@ async function downloadFileIntoScene(filename: string): Promise<File>{
   return file;
 };
 
+// Importing mesh into scene from .stl file
 function addMeshToScene(file: File): void{
   const fileReader = new FileReader();
 
@@ -96,7 +110,7 @@ function addMeshToScene(file: File): void{
         meshes[0].id = file.name
         meshes[0].name = file.name
 
-        // // gizmo
+        // creating and attaching gizmos
         const positionGizmo = new BABYLON.PositionGizmo(utilLayer);
         positionGizmo.attachedMesh = meshes[0]
         const rotationGizmo = new BABYLON.RotationGizmo(utilLayer);
@@ -111,7 +125,10 @@ function addMeshToScene(file: File): void{
   fileReader.readAsArrayBuffer(file);
 }
 
+// creating the html interface to input parameters and interact with mesh
 function createMeshInterface(file: File, mesh: BABYLON.Mesh, positionGizmo: BABYLON.PositionGizmo, rotationGizmo: BABYLON.RotationGizmo): void {
+
+  // parrent div containing the following objects
   const objectDiv = document.createElement('div');
   objectDiv.className = 'objectDiv';
   document.getElementById('interface')?.appendChild(objectDiv);
@@ -229,12 +246,14 @@ function createMeshInterface(file: File, mesh: BABYLON.Mesh, positionGizmo: BABY
   };
   objectDiv.appendChild(gizmoButton);
   
-    // remove button
+  // button to delete mesh and interface from scene
   const deleteButton = document.createElement('button');
   deleteButton.name = file.name;
   deleteButton.textContent = `${file.name} löschen`;
   deleteButton.className = 'deleteBtn';
   deleteButton.onclick = () => {
+
+    // Checking for existing selections on mesh
     if(coordinateSpheres[mesh.id]){
       coordinateSpheres[mesh.id].forEach(sphere => sphere.dispose());
       delete coordinateSpheres[mesh.id]
@@ -242,18 +261,20 @@ function createMeshInterface(file: File, mesh: BABYLON.Mesh, positionGizmo: BABY
     if(selectedCoordinates[mesh.id]){
       delete selectedCoordinates[mesh.id]
     }
+
     mesh.dispose();
-    // positionGizmo.dispose();
-    // rotationGizmo.dispose();
+    positionGizmo.dispose();
+    rotationGizmo.dispose();
     document.getElementById('interface')?.removeChild(objectDiv);
   };
   objectDiv.appendChild(deleteButton);
 
-  // scrape button
+  // button to start scraping
   const scrapeButton = document.createElement('button');
   scrapeButton.textContent = `${file.name} auskratzen`;
   scrapeButton.className = 'uploadBtn'; 
   scrapeButton.onclick = () => {requestScraping(file, {
+    // necessary parameters for scraping
     selections: selectedCoordinates[file.name],
     supportDiameter: supportDiameterInput.value as unknown as number,
     edgeWidth: edgeWidthInput.value as unknown as number,
@@ -265,14 +286,14 @@ function createMeshInterface(file: File, mesh: BABYLON.Mesh, positionGizmo: BABY
   })};
   objectDiv.appendChild(scrapeButton);
 
-  // // upload button
+  // upload button
   // const uploadButton = document.createElement('button');
   // uploadButton.textContent = `${file.name} Hochladen`;
   // uploadButton.className = 'uploadBtn';
   // uploadButton.onclick = () => {uploadFileToServer(file, xAxisInput.value, yAxisInput.value, zAxisInput.value)};
   // objectDiv.appendChild(uploadButton);
 
-  // download link
+  // link to download file from backend endpoint
   const downloadButton = document.createElement('button');
   downloadButton.className = "downloadBtn"
   const link = document.createElement('a');
@@ -288,6 +309,7 @@ function setupMeshInteraction(mesh: BABYLON.Mesh){
   mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickDownTrigger, () => {
     const clickedPoint = scene.pick(scene.pointerX, scene.pointerY, undefined, false)
     
+    // Checking if mesh has been clicked
     if(clickedPoint.hit && clickedPoint.pickedPoint){
       createSelection(mesh, clickedPoint.pickedPoint)      
     }
@@ -304,40 +326,43 @@ function createSelection(mesh: BABYLON.Mesh, coordinatesAsVector: BABYLON.Vector
     BABYLON.Matrix.Invert(mesh.getWorldMatrix())
   );
   sphere.position = localPosition
+
+  // Glueing sphere to mesh by making it child
   sphere.parent = mesh;
 
+  // Giving the sphere importand metadata
   sphere.metadata = {
     parentsMeshId: mesh.id,
     position: coordinatesAsVector.asArray()
   };
 
+  // Coloring the Sphere
   const sphereMat = new BABYLON.StandardMaterial('sphereMat', scene);
   sphereMat.diffuseColor = new BABYLON.Color3(1,0.1,0.1);
   sphereMat.alpha = 1;
   sphereMat.needDepthPrePass = true;
   sphere.material = sphereMat;
 
+  // Making the sphere removable
   sphere.actionManager = new BABYLON.ActionManager(scene);
   sphere.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickDownTrigger, () => {
     deselectPoint(sphere);
   }));
 
-  // pushing marker spheres
+  // pushing sphere into global sphere dictionary
   if(!coordinateSpheres[mesh.id]){
     coordinateSpheres[mesh.id] = [];
   }
   coordinateSpheres[mesh.id].push(sphere);
 
-  // // pushing marker coords
+  // pushing coordinates into global coordinate dictionary
   if(!selectedCoordinates[mesh.id]){
     selectedCoordinates[mesh.id] = [] as [number, number, number][];
   }
   selectedCoordinates[mesh.id].push(sphere.position.asArray())
 }
 
-function deselectPoint(sphere: BABYLON.Mesh){
-  console.log("deselecting");
-  
+function deselectPoint(sphere: BABYLON.Mesh){  
   const parentsMeshId = sphere.metadata.parentsMeshId;
   const position = sphere.metadata.position as [number, number, number];
 
@@ -355,22 +380,29 @@ function deselectPoint(sphere: BABYLON.Mesh){
  // rest //
 
 scene.createDefaultCameraOrLight(true, false, true);
+const cam = scene.activeCamera as BABYLON.ArcRotateCamera;
+if(cam){
+  cam.radius *= 4;
+}
+
 
 engine.runRenderLoop(() => {
   scene.render();
 });
 
+// starting connection to ASP.NET and immediatly registering for group "frontend"
 connection.start().then(() => connection.invoke("register", "frontend"));
 
 fileInput.addEventListener('change', async (event: Event) => {
   const target = event.target as HTMLInputElement;
 
   if (target.files && target.files.length > 0) {
-    const file = target.files[0];
+    const file = target.files[0]; 
     addMeshToScene(file)
   }
 });
 
+// making the engine responsive to window resizing
 window.addEventListener("resize", () => {
   engine.resize()
 })
@@ -382,10 +414,7 @@ connection.onreconnected(() => {
   console.log("Verbunden")
 })
 
-connection.on("ReceiveMessage", (data) => {
-  console.log(`message received: ${data}`);
-});
-
+// downloading file from backend endpoint and importing it into the scene
 connection.on("MeshTransformed", (filename) => {
   console.log(`Mesh bearbeitet ${filename}`)
   downloadFileIntoScene(filename)
@@ -394,6 +423,12 @@ connection.on("MeshTransformed", (filename) => {
   })
 });
 
+// debug event
+connection.on("ReceiveMessage", (data) => {
+  console.log(`message received: ${data}`);
+});
+
+// debug button
 const comCheckButton = document.getElementById("communicationCheckButton");
 if (comCheckButton) {
   comCheckButton.onclick = () => {
