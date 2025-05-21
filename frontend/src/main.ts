@@ -10,7 +10,7 @@ BABYLON.SceneLoader.RegisterPlugin(new STLFileLoader());
 const canvas = document.getElementById("renderCanvas") as HTMLCanvasElement;
 const engine = new BABYLON.Engine(canvas);
 const scene = new BABYLON.Scene(engine);
-// const utilLayer = new BABYLON.UtilityLayerRenderer(scene); // utility layer for gizmos
+const utilLayer = new BABYLON.UtilityLayerRenderer(scene); // utility layer for gizmos
 const fileInput = document.getElementById('fileInput') as HTMLInputElement; // input to upload files
 const selectedCoordinates: Record<string, [number, number, number][]> = {};
 const coordinateSpheres: Record<string, BABYLON.Mesh[]> = {};
@@ -50,16 +50,21 @@ function requestScraping(file: File, message: Object){
   const formData = new FormData();
   formData.append('file', file);
 
-  fetch(`${fileServerAdress}/upload`, {
-    method: "POST",
-    body: formData
-  })
-  .then((res) => res.json())
-  .then((response) => {
-    console.log(response.filename, 'hochgeladen');
-    connection.invoke('RequestScraping', message);
-  })
-  .catch((err) => console.log("Fehler beim Upload:", err));
+  if(selectedCoordinates[file.name] && selectedCoordinates[file.name].length === 5){
+    fetch(`${fileServerAdress}/upload`, {
+      method: "POST",
+      body: formData
+    })
+    .then((res) => res.json())
+    .then((response) => {
+      console.log(response.filename, 'hochgeladen');
+      connection.invoke('RequestScraping', message);
+    })
+    .catch((err) => console.log("Fehler beim Upload:", err));
+  }else{
+    alert("Bitte wähle genau 5 Punkte aus")
+  }
+
 }
 
 async function downloadFileIntoScene(filename: string): Promise<File>{
@@ -92,12 +97,12 @@ function addMeshToScene(file: File): void{
         meshes[0].name = file.name
 
         // // gizmo
-        // const positionGizmo = new BABYLON.PositionGizmo(utilLayer);
-        // positionGizmo.attachedMesh = meshes[0]
-        // const rotationGizmo = new BABYLON.RotationGizmo(utilLayer);
-        // rotationGizmo.attachedMesh = meshes[0]
+        const positionGizmo = new BABYLON.PositionGizmo(utilLayer);
+        positionGizmo.attachedMesh = meshes[0]
+        const rotationGizmo = new BABYLON.RotationGizmo(utilLayer);
+        rotationGizmo.attachedMesh = meshes[0]
         
-        createMeshInterface(file, meshes[0] as BABYLON.Mesh, /*positionGizmo, rotationGizmo*/)
+        createMeshInterface(file, meshes[0] as BABYLON.Mesh, positionGizmo, rotationGizmo)
         setupMeshInteraction(meshes[0] as BABYLON.Mesh)
       }, undefined, undefined, ".stl");
     }
@@ -106,7 +111,7 @@ function addMeshToScene(file: File): void{
   fileReader.readAsArrayBuffer(file);
 }
 
-function createMeshInterface(file: File, mesh: BABYLON.Mesh, /*positionGizmo: BABYLON.PositionGizmo, rotationGizmo: BABYLON.RotationGizmo*/): void {
+function createMeshInterface(file: File, mesh: BABYLON.Mesh, positionGizmo: BABYLON.PositionGizmo, rotationGizmo: BABYLON.RotationGizmo): void {
   const objectDiv = document.createElement('div');
   objectDiv.className = 'objectDiv';
   document.getElementById('interface')?.appendChild(objectDiv);
@@ -209,20 +214,20 @@ function createMeshInterface(file: File, mesh: BABYLON.Mesh, /*positionGizmo: BA
   objectDiv.appendChild(finalFilenameDiv)
 
   // gizmo button
-  // const gizmoButton = document.createElement('button');
-  // gizmoButton.textContent = 'toggle gizmo';
-  // gizmoButton.className = 'gizmoBtn';
-  // gizmoButton.onclick = () => {
-  //   if (rotationGizmo.attachedMesh && positionGizmo.attachedMesh){
-  //     rotationGizmo.attachedMesh = null;
-  //     positionGizmo.attachedMesh = null;
-  //   }
-  //   else {
-  //     rotationGizmo.attachedMesh = mesh;
-  //     positionGizmo.attachedMesh = mesh;
-  //   }
-  // };
-  // objectDiv.appendChild(gizmoButton);
+  const gizmoButton = document.createElement('button');
+  gizmoButton.textContent = 'toggle gizmo';
+  gizmoButton.className = 'gizmoBtn';
+  gizmoButton.onclick = () => {
+    if (rotationGizmo.attachedMesh && positionGizmo.attachedMesh){
+      rotationGizmo.attachedMesh = null;
+      positionGizmo.attachedMesh = null;
+    }
+    else {
+      rotationGizmo.attachedMesh = mesh;
+      positionGizmo.attachedMesh = mesh;
+    }
+  };
+  objectDiv.appendChild(gizmoButton);
   
     // remove button
   const deleteButton = document.createElement('button');
@@ -291,7 +296,7 @@ function setupMeshInteraction(mesh: BABYLON.Mesh){
 
 function createSelection(mesh: BABYLON.Mesh, coordinatesAsVector: BABYLON.Vector3){
 
-  const sphere = BABYLON.MeshBuilder.CreateSphere('selectedPoint', {diameter: 1}, scene);
+  const sphere = BABYLON.MeshBuilder.CreateSphere('selectedPoint', {diameter: 0.5}, scene);
 
   // Convert world position to local position relative to the parent mesh
   const localPosition = BABYLON.Vector3.TransformCoordinates(
@@ -307,7 +312,7 @@ function createSelection(mesh: BABYLON.Mesh, coordinatesAsVector: BABYLON.Vector
   };
 
   const sphereMat = new BABYLON.StandardMaterial('sphereMat', scene);
-  sphereMat.diffuseColor = new BABYLON.Color3(0,0,1);
+  sphereMat.diffuseColor = new BABYLON.Color3(1,0.1,0.1);
   sphereMat.alpha = 1;
   sphereMat.needDepthPrePass = true;
   sphere.material = sphereMat;
