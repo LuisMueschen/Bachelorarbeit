@@ -26,6 +26,7 @@ body {
   background-color: rgb(68, 70, 73);
   border-right: 5px solid black;
   align-items: center;
+  overflow-y: auto;
 }
 
 #communicationCheckButton{
@@ -55,11 +56,33 @@ body {
   display: flex;
   flex-direction: column;
   background-color: rgb(90, 91, 94);
+  border-top: 2px solid #000;
   width: 100%;
-  border-top: 4px  solid black;
-  border-bottom: 4px  solid black;
+}
+
+.objectDiv .filenameLabel {
+  align-self: center;
+  background-color: rgb(156, 156, 156);
+  text-align: center;
+  box-shadow: 0px 3px 10px rgb(90, 90, 90);
+  padding-top: 3px;
+  padding-bottom: 3px;
   margin-bottom: 4px;
-  padding-top: 5px;
+  margin-left: 0px;
+  width: 100%;
+}
+
+.objectDiv input {
+  margin: 5px;
+  border: 2px solid black;
+  border-radius: 6px;
+}
+
+.objectDiv label {
+  margin-left: 6px;
+  font-size: 14pt;
+  font-family: Arial, sans-serif;
+  width: auto;
 }
 
 .objectDiv button {
@@ -69,36 +92,26 @@ body {
   font-size: 11pt;
 }
 
-.deleteBtn {
+.objectDiv .deleteBtn {
   background-color: rgb(185, 71, 71);
+  grid-column-start: 2;
+  grid-column-end: 3;
 }
 
-.uploadBtn {
+.objectDiv .uploadBtn {
   background-color: rgb(117, 117, 117);
 }
 
-.downloadBtn {
+.objectDiv .downloadBtn {
   background-color: rgb(98, 176, 221);
 }
 
-.downloadLink {
+.objectDiv .downloadLink {
   text-decoration: none;
   color: black;
 }
 
-.parameterDiv {
-  display: flex;
-  flex-direction: column;
-}
-
-.parameterDiv input {
-  margin: 5px;
-  border: 2px solid black;
-}
-
-.parameterDiv label {
-  margin-left: 6px;
-  font-size: 14pt;
-  font-family: Arial, sans-serif;
-  width: auto;
+.objectDiv .buttonDiv {
+  display: grid;
+  grid-template-columns: 2;
 }

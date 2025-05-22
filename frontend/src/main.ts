@@ -132,7 +132,12 @@ function createMeshInterface(file: File, mesh: BABYLON.Mesh, positionGizmo: BABY
   const objectDiv = document.createElement('div');
   objectDiv.className = 'objectDiv';
   document.getElementById('interface')?.appendChild(objectDiv);
-  
+
+  const filenameLabel = document.createElement("label");
+  filenameLabel.textContent = file.name;
+  filenameLabel.className = "filenameLabel"
+  objectDiv.appendChild(filenameLabel)
+
   // parameter inputs
   // const xAxisDiv = document.createElement("div")
   // xAxisDiv.className = "parameterDiv"
@@ -164,75 +169,67 @@ function createMeshInterface(file: File, mesh: BABYLON.Mesh, positionGizmo: BABY
   // zAxisDiv.appendChild(zAxisLabel)
   // zAxisDiv.appendChild(zAxisInput)
   // objectDiv.appendChild(zAxisDiv)
-  const supportDiameterDiv = document.createElement("div")
-  supportDiameterDiv.className = "parameterDiv"
+
   const supportDiameterLabel = document.createElement("label")
   const supportDiameterInput = document.createElement("input")
   supportDiameterInput.type = "number"
   supportDiameterInput.value = "1.5"
   supportDiameterInput.id = "supportDiameterInput"
   supportDiameterLabel.textContent = "Durchmesser der Stütze in mm"
-  supportDiameterDiv.appendChild(supportDiameterLabel)
-  supportDiameterDiv.appendChild(supportDiameterInput)
-  objectDiv.appendChild(supportDiameterDiv)
-  const edgeWidthDiv = document.createElement("div")
-  edgeWidthDiv.className = "parameterDiv"
+  objectDiv.appendChild(supportDiameterLabel)
+  objectDiv.appendChild(supportDiameterInput)
+
   const edgeWidthLabel = document.createElement("label")
   const edgeWidthInput = document.createElement("input")
   edgeWidthInput.type = "number"
   edgeWidthInput.value = "2"
   edgeWidthInput.id = "edgeWidthInput"
   edgeWidthLabel.textContent = "Breite des Randes in mm"
-  edgeWidthDiv.appendChild(edgeWidthLabel)
-  edgeWidthDiv.appendChild(edgeWidthInput)
-  objectDiv.appendChild(edgeWidthDiv)
-  const transitionWidthDiv = document.createElement("div")
-  transitionWidthDiv.className = "parameterDiv"
+  objectDiv.appendChild(edgeWidthLabel)
+  objectDiv.appendChild(edgeWidthInput)
+
   const transitionWidthLabel = document.createElement("label")
   const transitionWidthInput = document.createElement("input")
   transitionWidthInput.type = "number"
   transitionWidthInput.value = "1"
   transitionWidthInput.id = "transitionWidthInput"
   transitionWidthLabel.textContent = "Gewünschte Wandstärke in mm"
-  transitionWidthDiv.appendChild(transitionWidthLabel)
-  transitionWidthDiv.appendChild(transitionWidthInput)
-  objectDiv.appendChild(transitionWidthDiv)
-  const targetWallThicknessDiv = document.createElement("div")
-  targetWallThicknessDiv.className = "parameterDiv"
+  objectDiv.appendChild(transitionWidthLabel)
+  objectDiv.appendChild(transitionWidthInput)
+
   const targetWallThicknessLabel = document.createElement("label")
   const targetWallThicknessInput = document.createElement("input")
   targetWallThicknessInput.type = "number"
   targetWallThicknessInput.value = "0.3"
   targetWallThicknessInput.id = "targetWallThicknessInput"
   targetWallThicknessLabel.textContent = "Gewünschte Okklusalstärke in mm"
-  targetWallThicknessDiv.appendChild(targetWallThicknessLabel)
-  targetWallThicknessDiv.appendChild(targetWallThicknessInput)
-  objectDiv.appendChild(targetWallThicknessDiv)
-  const targetTopThicknessDiv = document.createElement("div")
-  targetTopThicknessDiv.className = "parameterDiv"
+  objectDiv.appendChild(targetWallThicknessLabel)
+  objectDiv.appendChild(targetWallThicknessInput)
+  
   const targetTopThicknessLabel = document.createElement("label")
   const targetTopThicknessInput = document.createElement("input")
   targetTopThicknessInput.type = "number"
   targetTopThicknessInput.value = "0.5"
   targetTopThicknessInput.id = "targetTopThicknessInput"
   targetTopThicknessLabel.textContent = "Breite des Übergangs in mm"
-  targetTopThicknessDiv.appendChild(targetTopThicknessLabel)
-  targetTopThicknessDiv.appendChild(targetTopThicknessInput)
-  objectDiv.appendChild(targetTopThicknessDiv)
-  const finalFilenameDiv = document.createElement("div")
-  finalFilenameDiv.className = "parameterDiv"
+  objectDiv.appendChild(targetTopThicknessLabel)
+  objectDiv.appendChild(targetTopThicknessInput)
+
   const finalFilenameInput = document.createElement("input")
   const finalFilenameLabel = document.createElement("label")
   finalFilenameInput.id = "finalFilenameInput"
   finalFilenameInput.value = file.name
   finalFilenameLabel.textContent = "Finaler Dateiname"
-  finalFilenameDiv.appendChild(finalFilenameLabel)
-  finalFilenameDiv.appendChild(finalFilenameInput)
-  objectDiv.appendChild(finalFilenameDiv)
+  objectDiv.appendChild(finalFilenameLabel)
+  objectDiv.appendChild(finalFilenameInput)
+
+  const buttonDiv = document.createElement("div")
+  buttonDiv.className = "buttonDiv"
+  objectDiv.appendChild(buttonDiv)
 
   // gizmo button
   const gizmoButton = document.createElement('button');
-  gizmoButton.textContent = 'toggle gizmo';
+  gizmoButton.textContent = 'gizmo';
   gizmoButton.className = 'gizmoBtn';
   gizmoButton.onclick = () => {
     if (rotationGizmo.attachedMesh && positionGizmo.attachedMesh){
@@ -244,12 +241,12 @@ function createMeshInterface(file: File, mesh: BABYLON.Mesh, positionGizmo: BABY
       positionGizmo.attachedMesh = mesh;
     }
   };
-  objectDiv.appendChild(gizmoButton);
+  buttonDiv.appendChild(gizmoButton);
   
   // button to delete mesh and interface from scene
   const deleteButton = document.createElement('button');
   deleteButton.name = file.name;
-  deleteButton.textContent = `${file.name} löschen`;
+  deleteButton.textContent = `löschen`;
   deleteButton.className = 'deleteBtn';
   deleteButton.onclick = () => {
 
@@ -267,11 +264,11 @@ function createMeshInterface(file: File, mesh: BABYLON.Mesh, positionGizmo: BABY
     rotationGizmo.dispose();
     document.getElementById('interface')?.removeChild(objectDiv);
   };
-  objectDiv.appendChild(deleteButton);
+  buttonDiv.appendChild(deleteButton);
 
   // button to start scraping
   const scrapeButton = document.createElement('button');
-  scrapeButton.textContent = `${file.name} auskratzen`;
+  scrapeButton.textContent = `auskratzen`;
   scrapeButton.className = 'uploadBtn'; 
   scrapeButton.onclick = () => {requestScraping(file, {
     // necessary parameters for scraping
@@ -284,7 +281,7 @@ function createMeshInterface(file: File, mesh: BABYLON.Mesh, positionGizmo: BABY
     fileToUse: file.name,
     finalFilename: finalFilenameInput.value
   })};
-  objectDiv.appendChild(scrapeButton);
+  buttonDiv.appendChild(scrapeButton);
 
   // upload button
   // const uploadButton = document.createElement('button');
@@ -297,11 +294,11 @@ function createMeshInterface(file: File, mesh: BABYLON.Mesh, positionGizmo: BABY
   const downloadButton = document.createElement('button');
   downloadButton.className = "downloadBtn"
   const link = document.createElement('a');
-  link.textContent = `${file.name} runterladen`
+  link.textContent = `runterladen`
   link.href = `${fileServerAdress}/download/${file.name}`;
   link.className = 'downloadLink';
   downloadButton.appendChild(link);
-  objectDiv.appendChild(downloadButton);
+  buttonDiv.appendChild(downloadButton);
 }
 
 function setupMeshInteraction(mesh: BABYLON.Mesh){
@@ -333,7 +330,7 @@ function createSelection(mesh: BABYLON.Mesh, coordinatesAsVector: BABYLON.Vector
   // Giving the sphere importand metadata
   sphere.metadata = {
     parentsMeshId: mesh.id,
-    position: coordinatesAsVector.asArray()
+    position: sphere.position.asArray()
   };
 
   // Coloring the Sphere
@@ -343,7 +340,7 @@ function createSelection(mesh: BABYLON.Mesh, coordinatesAsVector: BABYLON.Vector
   sphereMat.needDepthPrePass = true;
   sphere.material = sphereMat;
 
-  // Making the sphere removable
+  // actionmanager to react to click on sphere
   sphere.actionManager = new BABYLON.ActionManager(scene);
   sphere.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickDownTrigger, () => {
     deselectPoint(sphere);
@@ -373,7 +370,7 @@ function deselectPoint(sphere: BABYLON.Mesh){
 
   // removing coords from dictionary
   selectedCoordinates[parentsMeshId] = selectedCoordinates[parentsMeshId].filter(coord => 
-    !(coord[0] === position[0] && coord[1] === position[1] && coord[2] === position[2])
+    !(coord[0] === position[0] && coord[1] === position[1] && coord[2] === position[2])    
   );
 }
 
