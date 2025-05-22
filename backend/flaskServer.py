@@ -8,6 +8,7 @@ from flask_cors import CORS
 from werkzeug.utils import secure_filename
 import threading
 import auskratzen
+import tempfile
 
 app = Flask(__name__)
 CORS(app)
@@ -82,19 +83,24 @@ def handle_transform(data):
     except Exception as e:
         print("Fehler bei der Transformation:", str(e))
 
+def start_new_scraping_task(data):
+    task_thread = threading.Thread(target=handle_scraping, args=data)
+    task_thread.daemon = True
+    task_thread.start()
+
 # scraping event 
 def handle_scraping(data):
-    selections = data[0]['selections']
-    support_diameter = float(data[0]['supportDiameter'])
-    edge_width = float(data[0]['edgeWidth'])
-    transition_width = float(data[0]['transitionWidth'])
-    target_wall_thickness = float(data[0]['targetWallThickness'])
-    target_top_thickness = float(data[0]['targetTopThickness'])
-    file_to_use = data[0]['fileToUse']
-    final_filename = data[0]['finalFilename']
+    selections = data['selections']
+    support_diameter = float(data['supportDiameter'])
+    edge_width = float(data['edgeWidth'])
+    transition_width = float(data['transitionWidth'])
+    target_wall_thickness = float(data['targetWallThickness'])
+    target_top_thickness = float(data['targetTopThickness'])
+    file_to_use = data['fileToUse']
+    final_filename = data['finalFilename']
     file_to_use = f'uploads/{file_to_use}'
     final_filename = f'uploads/{final_filename}'
-    connection_id = data[0]["connectionID"]
+    connection_id = data["connectionID"]
     print(selections)
     print(support_diameter)
     print(edge_width)
@@ -104,9 +110,13 @@ def handle_scraping(data):
     print(file_to_use)
     print(final_filename)
 
+    def temp_filename(suffix):
+        tf = tempfile.NamedTemporaryFile()
+        tf.close()
+        return tf.name+'.'+suffix
 
     # creating temporary point file
-    point_file_name = "./points.txt"
+    point_file_name = temp_filename(".txt")
     with open(point_file_name, "w") as file:
         for point in selections:
             line = " ".join(map(str, point))
@@ -123,7 +133,7 @@ def handle_scraping(data):
             transition_width,
             final_filename
         )
-        hub_connection.send("NotifyFrontendAboutManipulatedMesh", [data[0]["finalFilename"], connection_id])
+        hub_connection.send("NotifyFrontendAboutManipulatedMesh", [data["finalFilename"], connection_id])
     except Exception as e:
         print(e)
     
@@ -139,7 +149,7 @@ def connect_with_retry():
             hub_connection = HubConnectionBuilder().with_url('http://localhost:5500/myhub').build()
             hub_connection.on('CheckConnection', check_connection)
             hub_connection.on('FileUploaded', handle_transform)
-            hub_connection.on('NewScrapingTask', handle_scraping)
+            hub_connection.on('NewScrapingTask', start_new_scraping_task)
             hub_connection.start()
             print("verbunden")
             time.sleep(1)
