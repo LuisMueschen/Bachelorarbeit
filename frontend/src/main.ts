@@ -21,6 +21,15 @@ const fileInput = document.getElementById('fileInput') as HTMLInputElement;
 export const selectedCoordinates: Record<string, [number, number, number][]> = {};
 export const coordinateSpheres: Record<string, BABYLON.Mesh[]> = {};
 
+// const filesInput = new BABYLON.FilesInput(engine, scene, (_, scene) => (scene), null, null, null, (files) => {
+//   if(files){
+//     const file = files[0] as File
+//     addMeshToScene(file)
+//   }
+// }, null, null)
+
+// filesInput.monitorElementForDragNDrop(canvas)
+
 // Functions //
 
 // Importing mesh into scene from .stl file
@@ -324,6 +333,18 @@ fileInput.addEventListener('change', async (event: Event) => {
     addMeshToScene(file)
   }
 });
+
+
+window.addEventListener("dragover", (e) => {
+  e.preventDefault()
+})
+
+window.addEventListener("drop", (e) => {
+  e.preventDefault()
+  console.log(e.target);
+  const files = (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) ? Array.from(e.dataTransfer.files) : []
+  files.forEach((file) => addMeshToScene(file))
+})
 
 // making the engine responsive to window resizing
 window.addEventListener("resize", () => {
