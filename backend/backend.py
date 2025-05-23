@@ -1,5 +1,3 @@
-import io
-import trimesh
 from signalrcore.hub_connection_builder import HubConnectionBuilder
 import time
 import os
@@ -46,42 +44,6 @@ hub_connection = None
 def check_connection(args):
     print("message received: " + args[0])
     hub_connection.send("SendToFrontend", ["Hello Frontend!"])
-
-# proof of concept event
-def handle_transform(data):
-    # Empfängt Mesh-Daten vom Frontend, transformiert das Modell und sendet es zurück.
-    file_name = data[0]
-    connection_id = data[1]
-    if data[2] != '':
-        x_axis_value = float(data[2])
-    else:
-        x_axis_value = 1
-
-    if data[3] != '':
-        y_axis_value = float(data[3])
-    else:
-        y_axis_value = 1
-
-    if data[4] != '':
-        z_axis_value = float(data[4])
-    else:
-        z_axis_value = 1
-
-    print(data)
-
-    try:
-        # 3D-Modell laden und transformieren
-        with open(f"uploads/{file_name}", "rb") as file:
-            mesh = trimesh.load(io.BytesIO(file.read()), file_type="stl")
-            transformed_mesh = mesh.apply_scale((x_axis_value, y_axis_value, z_axis_value))
-
-        with open(f"uploads/streched-{file_name}", "wb") as file:
-            file.write(transformed_mesh.export(file_type='stl'))
-            
-        # Ergebnis zurücksenden
-        hub_connection.send("NotifyFrontendAboutManipulatedMesh", [f"streched-{file_name}", connection_id])
-    except Exception as e:
-        print("Fehler bei der Transformation:", str(e))
 
 def start_new_scraping_task(data):
     task_thread = threading.Thread(target=handle_scraping, args=data)
@@ -148,7 +110,6 @@ def connect_with_retry():
         try:
             hub_connection = HubConnectionBuilder().with_url('http://localhost:5500/myhub').build()
             hub_connection.on('CheckConnection', check_connection)
-            hub_connection.on('FileUploaded', handle_transform)
             hub_connection.on('NewScrapingTask', start_new_scraping_task)
             hub_connection.start()
             print("verbunden")

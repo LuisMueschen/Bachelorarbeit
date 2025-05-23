@@ -15,23 +15,6 @@ const connection = new signalR.HubConnectionBuilder()
     })
     .build();
 
-// Old function for streching proof of concept
-// function uploadFileToServer(file: File, xAxisValue: string, yAxisValue: string, zAxisValue: string): void{
-//   const formData = new FormData();
-//   formData.append('file', file);
-
-//   fetch(`${fileServerAdress}/upload`, {
-//     method: "POST",
-//     body: formData
-//   })
-//   .then((res) => res.json())
-//   .then((response) => {
-//     console.log(response.filename, 'hochgeladen');   
-//     connection.invoke('NotifyBackendAboutFileUpload', response.filename, xAxisValue, yAxisValue, zAxisValue)
-//   })
-//   .catch((err) => console.log("Fehler beim Upload:", err));
-// };
-
 // Downloading a File from Backend and returning a file object
 async function downloadFileIntoScene(filename: string): Promise<File>{
   const response = await fetch(`${fileServerAdress}/download/${filename}`);
