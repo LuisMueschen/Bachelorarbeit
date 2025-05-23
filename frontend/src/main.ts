@@ -21,15 +21,6 @@ const fileInput = document.getElementById('fileInput') as HTMLInputElement;
 export const selectedCoordinates: Record<string, [number, number, number][]> = {};
 export const coordinateSpheres: Record<string, BABYLON.Mesh[]> = {};
 
-// const filesInput = new BABYLON.FilesInput(engine, scene, (_, scene) => (scene), null, null, null, (files) => {
-//   if(files){
-//     const file = files[0] as File
-//     addMeshToScene(file)
-//   }
-// }, null, null)
-
-// filesInput.monitorElementForDragNDrop(canvas)
-
 // Functions //
 
 // Importing mesh into scene from .stl file
@@ -54,8 +45,12 @@ export function addMeshToScene(file: File): void{
         positionGizmo.attachedMesh = meshes[0]
         const rotationGizmo = new BABYLON.RotationGizmo(utilLayer);
         rotationGizmo.attachedMesh = meshes[0]
+
+        // mesh material for wireframe
+        const meshMat = new BABYLON.StandardMaterial("meshMat", scene)
+        meshes[0].material = meshMat
         
-        createMeshInterface(file, meshes[0] as BABYLON.Mesh, positionGizmo, rotationGizmo)
+        createMeshInterface(file, meshes[0] as BABYLON.Mesh, positionGizmo, rotationGizmo, meshMat)
         setupMeshInteraction(meshes[0] as BABYLON.Mesh)
       }, undefined, undefined, ".stl");
     }
@@ -65,7 +60,12 @@ export function addMeshToScene(file: File): void{
 }
 
 // creating the html interface to input parameters and interact with mesh
-function createMeshInterface(file: File, mesh: BABYLON.Mesh, positionGizmo: BABYLON.PositionGizmo, rotationGizmo: BABYLON.RotationGizmo): void {
+function createMeshInterface(
+  file: File, mesh: BABYLON.Mesh, 
+  positionGizmo: BABYLON.PositionGizmo, 
+  rotationGizmo: BABYLON.RotationGizmo,
+  meshMat: BABYLON.StandardMaterial
+): void {
 
   // parrent div containing the following objects
   const objectDiv = document.createElement('div');
@@ -78,37 +78,6 @@ function createMeshInterface(file: File, mesh: BABYLON.Mesh, positionGizmo: BABY
   objectDiv.appendChild(filenameLabel)
 
   // parameter inputs
-  // const xAxisDiv = document.createElement("div")
-  // xAxisDiv.className = "parameterDiv"
-  // const xAxisInput = document.createElement("input")
-  // const xAxisLabel = document.createElement("label")
-  // xAxisInput.type = "number"
-  // xAxisInput.id = "xAxisInput"
-  // xAxisLabel.textContent = "X-Achse"
-  // xAxisDiv.appendChild(xAxisLabel)
-  // xAxisDiv.appendChild(xAxisInput)
-  // objectDiv.appendChild(xAxisDiv)
-  // const yAxisDiv = document.createElement("div")
-  // yAxisDiv.className = "parameterDiv"
-  // const yAxisInput = document.createElement("input")
-  // const yAxisLabel = document.createElement("label")
-  // yAxisInput.type = "number"
-  // yAxisInput.id = "yAxisInput"
-  // yAxisLabel.textContent = "Y-Achse"
-  // yAxisDiv.appendChild(yAxisLabel)
-  // yAxisDiv.appendChild(yAxisInput)
-  // objectDiv.appendChild(yAxisDiv)
-  // const zAxisDiv = document.createElement("div")
-  // zAxisDiv.className = "parameterDiv"
-  // const zAxisInput = document.createElement("input")
-  // const zAxisLabel = document.createElement("label")
-  // zAxisInput.type = "number"
-  // zAxisInput.id = "zAxisInput"
-  // zAxisLabel.textContent = "Z-Achse"
-  // zAxisDiv.appendChild(zAxisLabel)
-  // zAxisDiv.appendChild(zAxisInput)
-  // objectDiv.appendChild(zAxisDiv)
-
   const supportDiameterLabel = document.createElement("label")
   const supportDiameterInput = document.createElement("input")
   supportDiameterInput.type = "number"
@@ -222,13 +191,6 @@ function createMeshInterface(file: File, mesh: BABYLON.Mesh, positionGizmo: BABY
   })};
   buttonDiv.appendChild(scrapeButton);
 
-  // upload button
-  // const uploadButton = document.createElement('button');
-  // uploadButton.textContent = `${file.name} Hochladen`;
-  // uploadButton.className = 'uploadBtn';
-  // uploadButton.onclick = () => {uploadFileToServer(file, xAxisInput.value, yAxisInput.value, zAxisInput.value)};
-  // objectDiv.appendChild(uploadButton);
-
   // link to download file from backend endpoint
   const downloadButton = document.createElement('button');
   downloadButton.className = "downloadBtn"
@@ -238,6 +200,14 @@ function createMeshInterface(file: File, mesh: BABYLON.Mesh, positionGizmo: BABY
   link.className = 'downloadLink';
   downloadButton.appendChild(link);
   buttonDiv.appendChild(downloadButton);
+
+  const wireframeButton = document.createElement("button");
+  wireframeButton.className = "wireframeBtn";
+  wireframeButton.textContent = "wireframe"
+  wireframeButton.onclick = () => {
+    meshMat.wireframe = !meshMat.wireframe;
+  };
+  buttonDiv.appendChild(wireframeButton);
 }
 
 function setupMeshInteraction(mesh: BABYLON.Mesh){
@@ -334,11 +304,12 @@ fileInput.addEventListener('change', async (event: Event) => {
   }
 });
 
-
+// necessary for file drag&drop
 window.addEventListener("dragover", (e) => {
   e.preventDefault()
 })
 
+// file drag&drop
 window.addEventListener("drop", (e) => {
   e.preventDefault()
   console.log(e.target);
