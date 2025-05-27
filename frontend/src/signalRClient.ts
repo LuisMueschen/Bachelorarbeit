@@ -71,6 +71,10 @@ connection.on("MeshTransformed", (filename) => {
   })
 });
 
+connection.on("ScrapingFailed", () => {
+ alert("Auskratzen Fehlgeschlagen \n \nBitte nutze eine gültige Datei und wähle korrekte Punkte aus")
+});
+
 // debug event
 connection.on("ReceiveMessage", (data) => {
   console.log(`message received: ${data}`);

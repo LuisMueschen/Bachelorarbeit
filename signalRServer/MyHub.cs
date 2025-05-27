@@ -39,13 +39,14 @@ public class MyHub : Hub
     public async Task RequestScraping(TaskMessage message)
     {
         Console.WriteLine("Auskratzen mit folgenden Parametern angefordert: \n" +
-            message.selections + "\n" +
-            message.supportDiameter + "\n" +
-            message.edgeWidth + "\n" +
-            message.transitionWidth + "\n" +
-            message.targetTopThickness + "\n" +
-            message.fileToUse + "\n" +
-            message.finalFilename + "\n"
+            "Punkte; " + message.selections + "\n" +
+            "Stützendurchmesse: " + message.supportDiameter + "\n" +
+            "Randdicke: " + message.edgeWidth + "\n" +
+            "Übergangsbreite: " + message.transitionWidth + "\n" +
+            "Okklusaldicke: " + message.targetTopThickness + "\n" +
+            "Wanddicke: " + message.targetWallThickness + "\n" +
+            "Dateiname alt: " + message.fileToUse + "\n" +
+            "Dateiname neu: " + message.finalFilename + "\n"
         );
         await Clients.Group("backend").SendAsync("NewScrapingTask", new
         {
@@ -65,5 +66,11 @@ public class MyHub : Hub
     {
         Console.WriteLine("Mesh wurde bearbeitet: " + filename);
         await Clients.Client(connectionID).SendAsync("MeshTransformed", filename);
+    }
+
+    public async Task NotifyFrontendAboutManipulationError(string connectionID)
+    {
+        Console.WriteLine("Auskratzen Fehlgeschlagen");
+        await Clients.Client(connectionID).SendAsync("ScrapingFailed");
     }
 }

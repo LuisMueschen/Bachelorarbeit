@@ -635,6 +635,7 @@ class Krone:
                     ddof=1)
                 mesh_points[idx] = mittlere_nachbar_position
                 anzahl_ausreisser += 1
+        print("Krone ausgekratzt")
         logging.info(f'{anzahl_ausreisser} Ausreisser korrigiert')
 
 

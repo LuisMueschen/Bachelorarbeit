@@ -97,6 +97,7 @@ def handle_scraping(data):
         )
         hub_connection.send("NotifyFrontendAboutManipulatedMesh", [data["finalFilename"], connection_id])
     except Exception as e:
+        hub_connection.send("NotifyFrontendAboutManipulationError", [connection_id])
         print(e)
     
     # deleting temporary point file
