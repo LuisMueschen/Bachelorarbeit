@@ -114,7 +114,7 @@ function createMeshInterface(
   transitionWidthInput.type = "number"
   transitionWidthInput.value = "1"
   transitionWidthInput.id = "transitionWidthInput"
-  transitionWidthLabel.textContent = "Gewünschte Wandstärke in mm"
+  transitionWidthLabel.textContent = "Breite des Übergangs in mm"
   objectDiv.appendChild(transitionWidthLabel)
   objectDiv.appendChild(transitionWidthInput)
 
@@ -123,7 +123,7 @@ function createMeshInterface(
   targetWallThicknessInput.type = "number"
   targetWallThicknessInput.value = "0.3"
   targetWallThicknessInput.id = "targetWallThicknessInput"
-  targetWallThicknessLabel.textContent = "Gewünschte Okklusalstärke in mm"
+  targetWallThicknessLabel.textContent = "Gewünschte Wandstärke in mm"
   objectDiv.appendChild(targetWallThicknessLabel)
   objectDiv.appendChild(targetWallThicknessInput)
   
@@ -132,7 +132,7 @@ function createMeshInterface(
   targetTopThicknessInput.type = "number"
   targetTopThicknessInput.value = "0.5"
   targetTopThicknessInput.id = "targetTopThicknessInput"
-  targetTopThicknessLabel.textContent = "Breite des Übergangs in mm"
+  targetTopThicknessLabel.textContent = "Gewünschte Okklusalstärke in mm"
   objectDiv.appendChild(targetTopThicknessLabel)
   objectDiv.appendChild(targetTopThicknessInput)
 

@@ -40,7 +40,7 @@ public class MyHub : Hub
     {
         Console.WriteLine("Auskratzen mit folgenden Parametern angefordert: \n" +
             "Punkte; " + message.selections + "\n" +
-            "Stützendurchmesse: " + message.supportDiameter + "\n" +
+            "Stützendurchmesser: " + message.supportDiameter + "\n" +
             "Randdicke: " + message.edgeWidth + "\n" +
             "Übergangsbreite: " + message.transitionWidth + "\n" +
             "Okklusaldicke: " + message.targetTopThickness + "\n" +
