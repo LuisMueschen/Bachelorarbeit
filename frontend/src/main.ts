@@ -178,17 +178,23 @@ function createMeshInterface(
   const scrapeButton = document.createElement('button');
   scrapeButton.textContent = `auskratzen`;
   scrapeButton.className = 'uploadBtn'; 
-  scrapeButton.onclick = () => {requestScraping(file, {
-    // necessary parameters for scraping
-    selections: selectedCoordinates[file.name],
-    supportDiameter: supportDiameterInput.value as unknown as number,
-    edgeWidth: edgeWidthInput.value as unknown as number,
-    transitionWidth: transitionWidthInput.value as unknown as number,
-    targetWallThickness: targetWallThicknessInput.value as unknown as number,
-    targetTopThickness: targetTopThicknessInput.value as unknown as number,
-    fileToUse: file.name,
-    finalFilename: finalFilenameInput.value
-  })};
+  scrapeButton.onclick = () => {
+    if(finalFilenameInput.value !== file.name){
+      requestScraping(file, {
+      // necessary parameters for scraping
+      selections: selectedCoordinates[file.name],
+      supportDiameter: supportDiameterInput.value as unknown as number,
+      edgeWidth: edgeWidthInput.value as unknown as number,
+      transitionWidth: transitionWidthInput.value as unknown as number,
+      targetWallThickness: targetWallThicknessInput.value as unknown as number,
+      targetTopThickness: targetTopThicknessInput.value as unknown as number,
+      fileToUse: file.name,
+      finalFilename: finalFilenameInput.value
+      });
+    }else{
+      alert("Bitte benenne die Neue Datei anders als die Alte")
+    };
+  };
   buttonDiv.appendChild(scrapeButton);
 
   // link to download file from backend endpoint
@@ -215,7 +221,7 @@ function setupMeshInteraction(mesh: BABYLON.Mesh){
   mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickDownTrigger, () => {
     const clickedPoint = scene.pick(scene.pointerX, scene.pointerY, undefined, false)
     
-    // Checking if mesh has been clicked
+    // Checking if mesh has been hit
     if(clickedPoint.hit && clickedPoint.pickedPoint){
       createSelection(mesh, clickedPoint.pickedPoint)      
     }
