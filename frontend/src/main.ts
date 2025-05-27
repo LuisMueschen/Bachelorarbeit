@@ -9,7 +9,7 @@ BABYLON.SceneLoader.RegisterPlugin(new STLFileLoader());
 
 const canvas = document.getElementById("renderCanvas") as HTMLCanvasElement;
 const engine = new BABYLON.Engine(canvas);
-const scene = new BABYLON.Scene(engine);
+const scene = createScene(engine);
 
 // utility layer for gizmos
 const utilLayer = new BABYLON.UtilityLayerRenderer(scene);
@@ -23,6 +23,22 @@ export const coordinateSpheres: Record<string, BABYLON.Mesh[]> = {};
 
 // Functions //
 
+function createScene(engine: BABYLON.Engine){
+  const scene = new BABYLON.Scene(engine);
+
+  const cam = new BABYLON.ArcRotateCamera("cam", 0, Math.PI, 20, new BABYLON.Vector3(0,0,0), scene);
+  cam.attachControl(canvas, true);
+  cam.wheelPrecision = 50;
+  cam.lowerRadiusLimit = 10;
+
+  const lowerLight = new BABYLON.HemisphericLight("lowerLight", new BABYLON.Vector3(0,-10,0), scene)
+  lowerLight.intensity = 0.65
+  const upperLight = new BABYLON.HemisphericLight("upperLight", new BABYLON.Vector3(4,10,4), scene)
+  upperLight.intensity = 0.4
+
+  return scene;
+};
+
 // Importing mesh into scene from .stl file
 export function addMeshToScene(file: File): void{
   const fileReader = new FileReader();
@@ -34,9 +50,6 @@ export function addMeshToScene(file: File): void{
       const url = URL.createObjectURL(blob);
 
       BABYLON.SceneLoader.ImportMesh(file.name, url, '', scene, (meshes) => {
-        // scaling
-        meshes[0].scaling.scaleInPlace(0.1);
-        meshes[0].position.y = -1;
         meshes[0].id = file.name
         meshes[0].name = file.name
 
@@ -290,12 +303,6 @@ function deselectPoint(sphere: BABYLON.Mesh){
 }
 
  // rest //
-
-scene.createDefaultCameraOrLight(true, false, true);
-const cam = scene.activeCamera as BABYLON.ArcRotateCamera;
-if(cam){
-  cam.radius *= 4;
-}
 
 engine.runRenderLoop(() => {
   scene.render();
