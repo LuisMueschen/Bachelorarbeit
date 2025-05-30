@@ -1,4 +1,3 @@
-using System.Data;
 using Microsoft.AspNetCore.SignalR;
 
 public class TaskMessage
@@ -12,22 +11,80 @@ public class TaskMessage
     public required string fileToUse { get; set; }
     public required string finalFilename { get; set; }
 }
+
+class Worker
+{
+    public string id;
+    private int taskCount = 0;
+
+    public Worker(string workerId)
+    {
+        id = workerId;
+    }
+    public int getTaskCount()
+    {
+        return taskCount;
+    }
+
+    public void increaseTaskCount()
+    {
+        taskCount++;
+    }
+
+    public void decreaseTaskCount()
+    {
+        taskCount--;
+    }
+}
 public class MyHub : Hub
 {
+    private static List<Worker> workers = new List<Worker>();
+
+    private static string? GetWorkerId()
+    {
+        // checking if workers exist
+        if (workers != null && workers.Count != 0)
+        {
+            // returning the worker with the least tasks
+            var minWorker = workers.MinBy(static worker => worker.getTaskCount());
+            return minWorker != null ? minWorker.id : null;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    private static void HandleWorkerReturn(string workerId)
+    {
+        Worker? worker = workers.FirstOrDefault(worker => worker.id == workerId);
+
+        if (worker != null && worker.getTaskCount() > 0)
+        {
+            worker.decreaseTaskCount();
+        }
+    }
     public Task Register(string groupName)
     {
+        if (groupName == "worker")
+        {
+            workers.Add(new Worker(Context.ConnectionId));
+        }
+
         Groups.AddToGroupAsync(Context.ConnectionId, groupName);
         Console.WriteLine($"Client {Context.ConnectionId} mit Gruppe {groupName} verbunden");
         return Task.CompletedTask;
     }
+
     public async Task Ping()
     {
         await Clients.Caller.SendAsync("Connected");
     }
+
     public async Task SendToBackend(string payload)
     {
         Console.WriteLine($"Vom Frontend empfangen: {payload}");
-        await Clients.Group("backend").SendAsync("CheckConnection", payload);
+        await Clients.Group("worker").SendAsync("CheckConnection", payload);
     }
 
     public async Task SendToFrontend(string payload)
@@ -48,29 +105,35 @@ public class MyHub : Hub
             "Dateiname alt: " + message.fileToUse + "\n" +
             "Dateiname neu: " + message.finalFilename + "\n"
         );
-        await Clients.Group("backend").SendAsync("NewScrapingTask", new
-        {
-            selections = message.selections,
-            supportDiameter = message.supportDiameter,
-            edgeWidth = message.edgeWidth,
-            transitionWidth = message.transitionWidth,
-            targetWallThickness = message.targetWallThickness,
-            targetTopThickness = message.targetTopThickness,
-            fileToUse = message.fileToUse,
-            finalFilename = message.finalFilename,
-            connectionID = Context.ConnectionId
-        });
+
+        string? workerId = GetWorkerId();
+        
+        if (workerId != null)
+            await Clients.Client(workerId).SendAsync("NewScrapingTask", new
+            {
+                selections = message.selections,
+                supportDiameter = message.supportDiameter,
+                edgeWidth = message.edgeWidth,
+                transitionWidth = message.transitionWidth,
+                targetWallThickness = message.targetWallThickness,
+                targetTopThickness = message.targetTopThickness,
+                fileToUse = message.fileToUse,
+                finalFilename = message.finalFilename,
+                connectionID = Context.ConnectionId
+            });
     }
 
-    public async Task NotifyFrontendAboutManipulatedMesh(string filename, string connectionID)
+    public async Task NotifyFrontendAboutManipulatedMesh(string filename, string frontendClientId)
     {
         Console.WriteLine("Mesh wurde bearbeitet: " + filename);
-        await Clients.Client(connectionID).SendAsync("MeshTransformed", filename);
+        HandleWorkerReturn(Context.ConnectionId);
+        await Clients.Client(frontendClientId).SendAsync("MeshTransformed", filename);
     }
 
-    public async Task NotifyFrontendAboutManipulationError(string connectionID)
+    public async Task NotifyFrontendAboutManipulationError(string frontendClientId)
     {
         Console.WriteLine("Auskratzen Fehlgeschlagen");
-        await Clients.Client(connectionID).SendAsync("ScrapingFailed");
+        HandleWorkerReturn(Context.ConnectionId);
+        await Clients.Client(frontendClientId).SendAsync("ScrapingFailed");
     }
 }

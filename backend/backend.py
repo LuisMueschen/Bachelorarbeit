@@ -104,6 +104,10 @@ def handle_scraping(data):
     os.remove(point_file_name)
     print("done")
     
+def pretend_to_work():
+    print("start working")
+    time.sleep(10)
+    print("working finished")
 
 def connect_with_retry():
     # creating signalR client and trying to connect to ASP.NET till connection is established
@@ -115,8 +119,8 @@ def connect_with_retry():
             hub_connection.start()
             print("verbunden")
             time.sleep(1)
-            # registering for group "backend"
-            hub_connection.send("register", ["backend"])
+            # registering for group "worker"
+            hub_connection.send("register", ["worker"])
             return hub_connection
         except:
             print("Verbindung Fehlgeschlagen")
