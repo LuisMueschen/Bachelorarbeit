@@ -38,6 +38,12 @@ class Worker
 }
 public class MyHub : Hub
 {
+    private readonly ILogger<MyHub> _logger;
+
+    public MyHub(ILogger<MyHub> logger)
+    {
+        _logger = logger;
+    }
     private static List<Worker> workers = new List<Worker>();
 
     private static string? GetWorkerId()
@@ -64,6 +70,7 @@ public class MyHub : Hub
             worker.decreaseTaskCount();
         }
     }
+    
     public Task Register(string groupName)
     {
         if (groupName == "worker")
@@ -109,6 +116,8 @@ public class MyHub : Hub
         string? workerId = GetWorkerId();
         
         if (workerId != null)
+        {
+            Console.WriteLine(workerId);
             await Clients.Client(workerId).SendAsync("NewScrapingTask", new
             {
                 selections = message.selections,
@@ -121,6 +130,11 @@ public class MyHub : Hub
                 finalFilename = message.finalFilename,
                 connectionID = Context.ConnectionId
             });
+        }
+        else
+        {
+            Console.WriteLine("Kein worker gefunden");
+        }
     }
 
     public async Task NotifyFrontendAboutManipulatedMesh(string filename, string frontendClientId)

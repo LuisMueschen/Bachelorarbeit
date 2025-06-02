@@ -1,44 +1,11 @@
 from signalrcore.hub_connection_builder import HubConnectionBuilder
 import time
 import os
-from flask import Flask, request, jsonify, send_from_directory, abort
-from flask_cors import CORS
 from werkzeug.utils import secure_filename
 import threading
-import auskratzen
+# import auskratzen
 import tempfile
-
-app = Flask(__name__)
-CORS(app)
-
-UPLOAD_FOLDER = 'uploads'
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
-@app.route('/upload', methods=['POST'])
-def upload():
-    if 'file' not in request.files:
-        return jsonify({'error': 'No file part'}), 400
-
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({'error': 'No selected file'}), 400
-
-    file_path = os.path.join(UPLOAD_FOLDER, secure_filename(file.filename))
-    file.save(file_path)
-
-    print(f"Datei gespeichert unter: {file_path}")
-
-    return jsonify({'filename': secure_filename(file.filename)}), 200
-
-@app.route('/download/<filename>', methods=['GET'])
-def download_file(filename):
-    save_filename = secure_filename(filename)
-    try:
-        return send_from_directory(UPLOAD_FOLDER, save_filename, as_attachment=True)
-    except FileNotFoundError:
-        abort(404)
-
-hub_connection = None
+import requests
 
 # debug event
 def check_connection(args):
@@ -84,18 +51,27 @@ def handle_scraping(data):
             line = " ".join(map(str, point))
             file.write(line + "\n")
 
+    # # downloading file to manipulate
+    # with requests.get(f"http://0.0.0.0:5500/download/{data[0]['fileToUse']}") as request:
+    #     request.raise_for_status()
+    #     with open(f"files/{file_to_use}") as file:
+    #         for chunk in request.iter_content(chunk_size=8192):
+    #             if chunk:
+    #                 file.write(chunk)
+    #                 print("writing")
     try:
-        auskratzen.modell_auskratzen(
-            file_to_use,
-            point_file_name,
-            support_diameter,
-            edge_width,
-            target_wall_thickness,
-            target_top_thickness,
-            transition_width,
-            final_filename
-        )
-        hub_connection.send("NotifyFrontendAboutManipulatedMesh", [data["finalFilename"], connection_id])
+        # auskratzen.modell_auskratzen(
+        #     file_to_use,
+        #     point_file_name,
+        #     support_diameter,
+        #     edge_width,
+        #     target_wall_thickness,
+        #     target_top_thickness,
+        #     transition_width,
+        #     final_filename
+        # )
+        pretend_to_work()
+        hub_connection.send("NotifyFrontendAboutManipulatedMesh", [data[0]["finalFilename"], connection_id])
     except Exception as e:
         hub_connection.send("NotifyFrontendAboutManipulationError", [connection_id])
         print(e)
@@ -114,40 +90,30 @@ def connect_with_retry():
     while True:
         try:
             hub_connection = HubConnectionBuilder().with_url('http://localhost:5500/myhub').build()
+            hub_connection.on('NewScrapingTask', handle_scraping)
             hub_connection.on('CheckConnection', check_connection)
-            hub_connection.on('NewScrapingTask', start_new_scraping_task)
             hub_connection.start()
             print("verbunden")
             time.sleep(1)
             # registering for group "worker"
-            hub_connection.send("register", ["worker"])
+            hub_connection.send("Register", ["worker"])
             return hub_connection
         except:
             print("Verbindung Fehlgeschlagen")
             time.sleep(3)
 
-def start_signalR_client():
-    global hub_connection
-    hub_connection = connect_with_retry()
 
-    # sending regular ping to check if client is connected, if connection is lost, new try to connect
-    while True:
+hub_connection = connect_with_retry()
+
+# sending regular ping to check if client is connected, if connection is lost, new try to connect
+while True:
+    try:
+        hub_connection.send("ping", [])
+    except Exception as e:
+        print("Verbindung verloren")
         try:
-            hub_connection.send("ping", [])
-        except Exception as e:
-            print("Verbindung verloren")
-            try:
-                hub_connection.stop()
-            except:
-                pass
-            hub_connection = connect_with_retry()
-        time.sleep(5)    
-
-if __name__ == "__main__":
-    # creating new thread to run signalR client parallel to flask
-    signalR_thread = threading.Thread(target=start_signalR_client)
-    signalR_thread.daemon = True
-    signalR_thread.start()
-
-    print("Starte Server")
-    app.run(host='0.0.0.0', port=5000)
+            hub_connection.stop()
+        except:
+            pass
+        hub_connection = connect_with_retry()
+    time.sleep(5)    
