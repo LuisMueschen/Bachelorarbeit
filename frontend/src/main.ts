@@ -1,7 +1,7 @@
 import * as BABYLON from 'babylonjs';
 import { STLFileLoader } from 'babylonjs-loaders';
 // import * as processenv from 'processenv'
-import { fileServerAdress, requestScraping } from './signalRClient';
+import { serverAdress, requestScraping } from './signalRClient';
 
 BABYLON.SceneLoader.RegisterPlugin(new STLFileLoader());
 
@@ -215,7 +215,7 @@ function createMeshInterface(
   downloadButton.className = "downloadBtn"
   const link = document.createElement('a');
   link.textContent = `runterladen`
-  link.href = `${fileServerAdress}/download/${file.name}`;
+  link.href = `${serverAdress}/download/${file.name}`;
   link.className = 'downloadLink';
   downloadButton.appendChild(link);
   buttonDiv.appendChild(downloadButton);

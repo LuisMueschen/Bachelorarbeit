@@ -23,7 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 
-/backend/uploads
 /signalRServer/bin/
 /signalRServer/obj/
+/signalRServer/Uploads/
 /backend/__pycache__

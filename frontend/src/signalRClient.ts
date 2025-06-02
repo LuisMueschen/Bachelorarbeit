@@ -2,12 +2,11 @@ import { selectedCoordinates, coordinateSpheres, addMeshToScene } from "./main";
 import * as signalR from "@microsoft/signalr";
 
 // Server adresses
-export const dotnetAdress = 'http://localhost:5500/myhub'
-export const fileServerAdress = 'http://localhost:5000'
+export const serverAdress = 'http://localhost:5500'
 
 // Connection to ASP.NET Server
 const connection = new signalR.HubConnectionBuilder()
-    .withUrl(dotnetAdress)
+    .withUrl(`${serverAdress}/myhub`)
     .withAutomaticReconnect({
       nextRetryDelayInMilliseconds: retryContext => {
         return Math.min(1000 * (retryContext.previousRetryCount + 1), 10000);
@@ -17,7 +16,7 @@ const connection = new signalR.HubConnectionBuilder()
 
 // Downloading a File from Backend and returning a file object
 async function downloadFileIntoScene(filename: string): Promise<File>{
-  const response = await fetch(`${fileServerAdress}/download/${filename}`);
+  const response = await fetch(`${serverAdress}/download/${filename}`);
   if(!response.ok){
     throw new Error("Download Fehlgeschlagen");
   }
@@ -36,7 +35,7 @@ export function requestScraping(file: File, message: Object){
   // Checking if exactly 5 points are selected
   if(selectedCoordinates[file.name] && selectedCoordinates[file.name].length === 5){
     // Uploading file to manipulate
-    fetch(`${fileServerAdress}/upload`, {
+    fetch(`${serverAdress}/upload`, {
       method: "POST",
       body: formData
     })

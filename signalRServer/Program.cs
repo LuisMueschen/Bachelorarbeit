@@ -19,6 +19,8 @@ builder.Services.AddCors(options =>
 // SignalR-Dienste registrieren
 builder.Services.AddSignalR();
 
+builder.Services.AddControllers();
+
 builder.WebHost.UseUrls("http://0.0.0.0:5500");
 
 var app = builder.Build();
@@ -27,5 +29,7 @@ app.UseCors();
 
 // Routen definieren
 app.MapHub<MyHub>("/myhub");
+app.UseRouting();
+app.MapControllers();
 
 app.Run();
