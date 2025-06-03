@@ -7,6 +7,7 @@ import tempfile
 import heightmap
 import urllib
 import logging
+import requests
 
 # debug event
 def check_connection(args):
@@ -52,26 +53,33 @@ def handle_scraping(data):
             line = " ".join(map(str, point))
             file.write(line + "\n")
 
-    urllib.request.urlretrieve(f"http://localhost:5500/download/Gold_Reduz_5.stl", file_to_use)
+    # downloading file to manipulate
+    urllib.request.urlretrieve(f"http://localhost:5500/download/{data[0]['fileToUse']}", file_to_use)
 
     try:
-        # auskratzen.modell_auskratzen(
-        #     file_to_use,
-        #     point_file_name,
-        #     support_diameter,
-        #     edge_width,
-        #     target_wall_thickness,
-        #     target_top_thickness,
-        #     transition_width,
-        #     final_filename
-        # )
-        pretend_to_work()
-        # hub_connection.send("NotifyFrontendAboutManipulatedMesh", [data[0]["finalFilename"], connection_id])
+        auskratzen.modell_auskratzen(
+            file_to_use,
+            point_file_name,
+            support_diameter,
+            edge_width,
+            target_wall_thickness,
+            target_top_thickness,
+            transition_width,
+            final_filename
+        )
+
+        # upload of manipulated file to server
+        files = {'file': open(final_filename, 'rb')}
+        r = requests.post(url='http://localhost:5500/upload', files=files)
+        
+        hub_connection.send("NotifyFrontendAboutManipulatedMesh", [data[0]["finalFilename"], connection_id])
     except Exception as e:
         hub_connection.send("NotifyFrontendAboutManipulationError", [connection_id])
         print(e)
     
-    # deleting temporary point file
+    # deleting unneccesary files
+    os.remove(file_to_use)
+    os.remove(final_filename)
     os.remove(point_file_name)
     print("done")
     
@@ -89,7 +97,7 @@ def connect_with_retry():
     # creating signalR client and trying to connect to ASP.NET till connection is established
     while True:
         try:
-            hub_connection = HubConnectionBuilder().with_url('http://localhost:5500/myhub').configure_logging(logging.DEBUG).build()
+            hub_connection = HubConnectionBuilder().with_url('http://localhost:5500/myhub').build()
             hub_connection.on('CheckConnection', check_connection)
             hub_connection.on('NewScrapingTask', handle_scraping)
             hub_connection.on('NewReliefTask', handle_relief)
