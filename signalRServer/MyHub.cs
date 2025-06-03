@@ -71,7 +71,22 @@ public class MyHub : Hub
             worker.decreaseTaskCount();
         }
     }
-    
+
+    public override async Task OnDisconnectedAsync(Exception? exception)
+    {
+        string ConnectionId = Context.ConnectionId;
+
+        Worker? worker = workers.FirstOrDefault(worker => worker.id == ConnectionId);
+
+        if (worker != null)
+        {
+            workers.Remove(worker);
+            _logger.LogInformation(ConnectionId + " aus Workerliste entfernt");
+        }
+
+        await base.OnDisconnectedAsync(exception);
+    }
+
     public Task Register(string groupName)
     {
         if (groupName == "worker")
@@ -80,7 +95,7 @@ public class MyHub : Hub
         }
 
         Groups.AddToGroupAsync(Context.ConnectionId, groupName);
-        Console.WriteLine($"Client {Context.ConnectionId} mit Gruppe {groupName} verbunden");
+        _logger.LogInformation($"{Context.ConnectionId} mit Gruppe {groupName} verbunden");
         return Task.CompletedTask;
     }
 
@@ -91,19 +106,19 @@ public class MyHub : Hub
 
     public async Task SendToBackend(string payload)
     {
-        Console.WriteLine($"Vom Frontend empfangen: {payload}");
+        _logger.LogInformation($"Vom Frontend empfangen: {payload}");
         await Clients.Group("worker").SendAsync("CheckConnection", payload);
     }
 
     public async Task SendToFrontend(string payload)
     {
-        Console.WriteLine($"Vom Backend empfangen: {payload}");
+        _logger.LogInformation($"Vom Backend empfangen: {payload}");
         await Clients.Group("frontend").SendAsync("ReceiveMessage", payload);
     }
 
     public async Task RequestScraping(TaskMessage message)
     {
-        Console.WriteLine("Auskratzen mit folgenden Parametern angefordert: \n" +
+        _logger.LogInformation("Auskratzen mit folgenden Parametern angefordert: \n" +
             "Punkte; " + message.selections + "\n" +
             "Stützendurchmesser: " + message.supportDiameter + "\n" +
             "Randdicke: " + message.edgeWidth + "\n" +
@@ -118,7 +133,7 @@ public class MyHub : Hub
 
         if (workerId != null)
         {
-            Console.WriteLine(workerId);
+            _logger.LogInformation(workerId+'\n');
             await Clients.Client(workerId).SendAsync("NewScrapingTask", new
             {
                 selections = message.selections,
@@ -134,26 +149,26 @@ public class MyHub : Hub
         }
         else
         {
-            Console.WriteLine("Kein worker gefunden");
+            _logger.LogInformation("Kein worker gefunden");
         }
     }
 
     public async Task RequestNewRelief(string filename)
     {
-        Console.WriteLine(filename + " hochgeladen");
+        _logger.LogInformation(filename + " hochgeladen");
         await Clients.Group("backend").SendAsync("NewReliefTask", filename, Context.ConnectionId);
     }
     
     public async Task NotifyFrontendAboutManipulatedMesh(string filename, string frontendClientId)
     {
-        Console.WriteLine("Mesh wurde bearbeitet: " + filename);
+        _logger.LogInformation("Mesh wurde bearbeitet: " + filename);
         HandleWorkerReturn(Context.ConnectionId);
         await Clients.Client(frontendClientId).SendAsync("MeshTransformed", filename);
     }
 
     public async Task NotifyFrontendAboutManipulationError(string frontendClientId)
     {
-        Console.WriteLine("Auskratzen Fehlgeschlagen");
+        _logger.LogInformation("Auskratzen Fehlgeschlagen");
         HandleWorkerReturn(Context.ConnectionId);
         await Clients.Client(frontendClientId).SendAsync("ScrapingFailed");
     }

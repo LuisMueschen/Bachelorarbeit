@@ -55,7 +55,7 @@ export function uploadImage(file: File){
   const formData = new FormData();
   formData.append('file', file)
 
-  fetch(`${fileServerAdress}/upload`, {
+  fetch(`${serverAdress}/upload`, {
     method: "POST",
     body: formData
   }).then((res) => res.json())

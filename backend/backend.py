@@ -1,12 +1,12 @@
 from signalrcore.hub_connection_builder import HubConnectionBuilder
 import time
 import os
-from werkzeug.utils import secure_filename
 import threading
-# import auskratzen
+import auskratzen
 import tempfile
-import requests
 import heightmap
+import urllib
+import logging
 
 # debug event
 def check_connection(args):
@@ -20,17 +20,17 @@ def start_new_scraping_task(data):
 
 # scraping event 
 def handle_scraping(data):
-    selections = data['selections']
-    support_diameter = float(data['supportDiameter'])
-    edge_width = float(data['edgeWidth'])
-    transition_width = float(data['transitionWidth'])
-    target_wall_thickness = float(data['targetWallThickness'])
-    target_top_thickness = float(data['targetTopThickness'])
-    file_to_use = data['fileToUse']
-    final_filename = data['finalFilename']
-    file_to_use = f'uploads/{file_to_use}'
-    final_filename = f'uploads/{final_filename}'
-    connection_id = data["connectionID"]
+    selections = data[0]['selections']
+    support_diameter = float(data[0]['supportDiameter'])
+    edge_width = float(data[0]['edgeWidth'])
+    transition_width = float(data[0]['transitionWidth'])
+    target_wall_thickness = float(data[0]['targetWallThickness'])
+    target_top_thickness = float(data[0]['targetTopThickness'])
+    file_to_use = data[0]['fileToUse']
+    final_filename = data[0]['finalFilename']
+    file_to_use = f'files/{file_to_use}'
+    final_filename = f'files/{final_filename}'
+    connection_id = data[0]["connectionID"]
     print(f'Punkte: {selections}')
     print(f'Stützendurchmesser: {support_diameter}')
     print(f'Randbreite: {edge_width}')
@@ -52,14 +52,8 @@ def handle_scraping(data):
             line = " ".join(map(str, point))
             file.write(line + "\n")
 
-    # # downloading file to manipulate
-    # with requests.get(f"http://0.0.0.0:5500/download/{data[0]['fileToUse']}") as request:
-    #     request.raise_for_status()
-    #     with open(f"files/{file_to_use}") as file:
-    #         for chunk in request.iter_content(chunk_size=8192):
-    #             if chunk:
-    #                 file.write(chunk)
-    #                 print("writing")
+    urllib.request.urlretrieve(f"http://localhost:5500/download/Gold_Reduz_5.stl", file_to_use)
+
     try:
         # auskratzen.modell_auskratzen(
         #     file_to_use,
@@ -72,7 +66,7 @@ def handle_scraping(data):
         #     final_filename
         # )
         pretend_to_work()
-        hub_connection.send("NotifyFrontendAboutManipulatedMesh", [data[0]["finalFilename"], connection_id])
+        # hub_connection.send("NotifyFrontendAboutManipulatedMesh", [data[0]["finalFilename"], connection_id])
     except Exception as e:
         hub_connection.send("NotifyFrontendAboutManipulationError", [connection_id])
         print(e)
@@ -95,15 +89,15 @@ def connect_with_retry():
     # creating signalR client and trying to connect to ASP.NET till connection is established
     while True:
         try:
-            hub_connection = HubConnectionBuilder().with_url('http://localhost:5500/myhub').build()
+            hub_connection = HubConnectionBuilder().with_url('http://localhost:5500/myhub').configure_logging(logging.DEBUG).build()
             hub_connection.on('CheckConnection', check_connection)
-            hub_connection.on('NewScrapingTask', start_new_scraping_task)
+            hub_connection.on('NewScrapingTask', handle_scraping)
             hub_connection.on('NewReliefTask', handle_relief)
             hub_connection.start()
             print("verbunden")
-            time.sleep(1)
             # registering for group "worker"
-            hub_connection.send("Register", ["worker"])
+            hub_connection.on_open(lambda: hub_connection.send("Register", ["worker"]))
+            time.sleep(1)
             return hub_connection
         except:
             print("Verbindung Fehlgeschlagen")
@@ -123,4 +117,4 @@ while True:
         except:
             pass
         hub_connection = connect_with_retry()
-    time.sleep(5)    
+    time.sleep(5)
