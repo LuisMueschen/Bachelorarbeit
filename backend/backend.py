@@ -6,6 +6,7 @@ import threading
 # import auskratzen
 import tempfile
 import requests
+import heightmap
 
 # debug event
 def check_connection(args):
@@ -30,14 +31,14 @@ def handle_scraping(data):
     file_to_use = f'uploads/{file_to_use}'
     final_filename = f'uploads/{final_filename}'
     connection_id = data["connectionID"]
-    print(selections)
-    print(support_diameter)
-    print(edge_width)
-    print(transition_width)
-    print(target_wall_thickness)
-    print(target_top_thickness)
-    print(file_to_use)
-    print(final_filename)
+    print(f'Punkte: {selections}')
+    print(f'Stützendurchmesser: {support_diameter}')
+    print(f'Randbreite: {edge_width}')
+    print(f'Übergangsbreite: {transition_width}')
+    print(f'Wanddicke: {target_wall_thickness}')
+    print(f'Okklusaldicke: {target_top_thickness}')
+    print(f'Dateiname alt: {file_to_use}')
+    print(f'Datiename neu: {final_filename}')
 
     def temp_filename(suffix):
         tf = tempfile.NamedTemporaryFile()
@@ -85,13 +86,19 @@ def pretend_to_work():
     time.sleep(10)
     print("working finished")
 
+def handle_relief(data):
+    print("relief angeforderd")
+    heightmap.create_relief(data[0], "test.stl")
+    hub_connection.send("NotifyFrontendAboutManipulatedMesh", [data[0], data[1]])
+
 def connect_with_retry():
     # creating signalR client and trying to connect to ASP.NET till connection is established
     while True:
         try:
             hub_connection = HubConnectionBuilder().with_url('http://localhost:5500/myhub').build()
-            hub_connection.on('NewScrapingTask', handle_scraping)
             hub_connection.on('CheckConnection', check_connection)
+            hub_connection.on('NewScrapingTask', start_new_scraping_task)
+            hub_connection.on('NewReliefTask', handle_relief)
             hub_connection.start()
             print("verbunden")
             time.sleep(1)

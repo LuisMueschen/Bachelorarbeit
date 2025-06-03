@@ -1,7 +1,7 @@
 import * as BABYLON from 'babylonjs';
 import { STLFileLoader } from 'babylonjs-loaders';
 // import * as processenv from 'processenv'
-import { serverAdress, requestScraping } from './signalRClient';
+import { serverAdress, requestScraping, uploadImage } from './signalRClient';
 
 BABYLON.SceneLoader.RegisterPlugin(new STLFileLoader());
 
@@ -229,6 +229,34 @@ function createMeshInterface(
   buttonDiv.appendChild(wireframeButton);
 }
 
+function createImageInterface(file: File){
+  const div = document.createElement("div")
+  div.className = 'objectDiv'
+
+  const filenameLabel = document.createElement("label");
+  filenameLabel.textContent = file.name;
+  filenameLabel.className = "filenameLabel"
+  div.appendChild(filenameLabel)
+
+  const uploadButton = document.createElement("button")
+  uploadButton.onclick = () => {
+    uploadImage(file)
+  }
+  uploadButton.textContent = "hochladen"
+  div.appendChild(uploadButton)
+
+  const deleteButton = document.createElement('button');
+  deleteButton.name = file.name;
+  deleteButton.textContent = `löschen`;
+  deleteButton.className = 'deleteBtn';
+  deleteButton.onclick = () => {
+    document.getElementById('interface')?.removeChild(div);
+  }
+  div.appendChild(deleteButton)
+
+  document.getElementById('interface')?.appendChild(div)
+}
+
 function setupMeshInteraction(mesh: BABYLON.Mesh){
   mesh.actionManager = new BABYLON.ActionManager(scene)
   mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickDownTrigger, () => {
@@ -312,8 +340,8 @@ fileInput.addEventListener('change', async (event: Event) => {
   const target = event.target as HTMLInputElement;
 
   if (target.files && target.files.length > 0) {
-    const file = target.files[0]; 
-    addMeshToScene(file)
+    const file = target.files[0];
+    file.type.includes("image") ? createImageInterface(file) : addMeshToScene(file)
   }
 });
 
@@ -325,7 +353,6 @@ window.addEventListener("dragover", (e) => {
 // file drag&drop
 window.addEventListener("drop", (e) => {
   e.preventDefault()
-  console.log(e.target);
   const files = (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) ? Array.from(e.dataTransfer.files) : []
   files.forEach((file) => addMeshToScene(file))
 })

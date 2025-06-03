@@ -51,6 +51,19 @@ export function requestScraping(file: File, message: Object){
   }
 }
 
+export function uploadImage(file: File){
+  const formData = new FormData();
+  formData.append('file', file)
+
+  fetch(`${fileServerAdress}/upload`, {
+    method: "POST",
+    body: formData
+  }).then((res) => res.json())
+  .then(() => {
+    connection.invoke("requestNewRelief", file.name)    
+  })
+}
+
 // starting connection to ASP.NET and immediatly registering for group "frontend"
 connection.start().then(() => connection.invoke("register", "frontend"));
 

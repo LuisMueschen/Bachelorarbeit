@@ -44,6 +44,7 @@ public class MyHub : Hub
     {
         _logger = logger;
     }
+
     private static List<Worker> workers = new List<Worker>();
 
     private static string? GetWorkerId()
@@ -114,7 +115,7 @@ public class MyHub : Hub
         );
 
         string? workerId = GetWorkerId();
-        
+
         if (workerId != null)
         {
             Console.WriteLine(workerId);
@@ -137,6 +138,12 @@ public class MyHub : Hub
         }
     }
 
+    public async Task RequestNewRelief(string filename)
+    {
+        Console.WriteLine(filename + " hochgeladen");
+        await Clients.Group("backend").SendAsync("NewReliefTask", filename, Context.ConnectionId);
+    }
+    
     public async Task NotifyFrontendAboutManipulatedMesh(string filename, string frontendClientId)
     {
         Console.WriteLine("Mesh wurde bearbeitet: " + filename);
