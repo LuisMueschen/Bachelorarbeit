@@ -83,11 +83,12 @@ def handle_scraping(data):
     os.remove(point_file_name)
     print("done")
     
-def pretend_to_work():
+def pretend_to_work(data):
     print("start working")
     time.sleep(10)
     print("working finished")
-
+    hub_connection.send("NotifyFrontendAboutManipulationError", [data[0]])
+    
 def handle_relief(data):
     print("relief angeforderd")
     heightmap.create_relief(data[0], "test.stl")
@@ -101,6 +102,7 @@ def connect_with_retry():
             hub_connection.on('CheckConnection', check_connection)
             hub_connection.on('NewScrapingTask', handle_scraping)
             hub_connection.on('NewReliefTask', handle_relief)
+            hub_connection.on('NewDummyTask', pretend_to_work)
             hub_connection.start()
             print("verbunden")
             # registering for group "worker"

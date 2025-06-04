@@ -92,6 +92,16 @@ connection.on("ReceiveMessage", (data) => {
   console.log(`message received: ${data}`);
 });
 
+// dummy task button
+const dummyTaskButton = document.createElement("button");
+dummyTaskButton.textContent = 'Dummy Task starten'
+dummyTaskButton.onclick = () => {
+  console.log("triggered");
+  
+  connection.invoke("RequestNewDummyTask")
+}
+document.getElementById("interface")?.appendChild(dummyTaskButton)
+
 // debug button
 const comCheckButton = document.getElementById("communicationCheckButton");
 if (comCheckButton) {

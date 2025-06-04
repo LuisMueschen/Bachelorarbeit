@@ -37,4 +37,16 @@ app.MapHub<MyHub>("/myhub");
 app.UseRouting();
 app.MapControllers();
 
+_ = Task.Run(() =>
+{
+    while (true)
+    {
+        var key = Console.ReadKey(true);
+        if (key.Key == ConsoleKey.W)
+        {
+            MyHub.PrintWorkers();
+        }
+    }
+});
+
 app.Run();

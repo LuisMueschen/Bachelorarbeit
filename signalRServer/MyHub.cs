@@ -47,14 +47,27 @@ public class MyHub : Hub
 
     private static List<Worker> workers = new List<Worker>();
 
-    private static string? GetWorkerId()
+    public static void PrintWorkers()
+    {
+        Console.WriteLine("Aktuelle Worker-Liste:");
+        foreach (var worker in workers)
+        {
+            Console.WriteLine($"WorkerId: {worker.id}, Tasks: {worker.getTaskCount()}");
+        }
+        if (workers.Count == 0)
+        {
+            Console.WriteLine("Keine Worker registriert.");
+        }
+    }
+
+    private static Worker? GetWorker()
     {
         // checking if workers exist
         if (workers != null && workers.Count != 0)
         {
             // returning the worker with the least tasks
             var minWorker = workers.MinBy(static worker => worker.getTaskCount());
-            return minWorker != null ? minWorker.id : null;
+            return minWorker != null ? minWorker : null;
         }
         else
         {
@@ -118,22 +131,24 @@ public class MyHub : Hub
 
     public async Task RequestScraping(TaskMessage message)
     {
-        _logger.LogInformation("Auskratzen mit folgenden Parametern angefordert: \n" +
-            "Punkte; " + message.selections + "\n" +
-            "Stützendurchmesser: " + message.supportDiameter + "\n" +
-            "Randdicke: " + message.edgeWidth + "\n" +
-            "Übergangsbreite: " + message.transitionWidth + "\n" +
-            "Okklusaldicke: " + message.targetTopThickness + "\n" +
-            "Wanddicke: " + message.targetWallThickness + "\n" +
-            "Dateiname alt: " + message.fileToUse + "\n" +
-            "Dateiname neu: " + message.finalFilename + "\n"
-        );
+        Worker? worker = GetWorker();
+        string? workerId = worker != null ? worker.id : null;
 
-        string? workerId = GetWorkerId();
-
-        if (workerId != null)
+        if (worker != null && workerId != null)
         {
-            _logger.LogInformation(workerId+'\n');
+            _logger.LogInformation("Auskratzen mit folgenden Parametern angefordert: \n" +
+                "WorkerId: " + workerId + "\n\n" +
+                "Punkte: " + message.selections + "\n" +
+                "Stützendurchmesser: " + message.supportDiameter + "\n" +
+                "Randdicke: " + message.edgeWidth + "\n" +
+                "Übergangsbreite: " + message.transitionWidth + "\n" +
+                "Okklusaldicke: " + message.targetTopThickness + "\n" +
+                "Wanddicke: " + message.targetWallThickness + "\n" +
+                "Dateiname alt: " + message.fileToUse + "\n" +
+                "Dateiname neu: " + message.finalFilename + "\n"
+            );
+
+            worker.increaseTaskCount();
             await Clients.Client(workerId).SendAsync("NewScrapingTask", new
             {
                 selections = message.selections,
@@ -155,9 +170,31 @@ public class MyHub : Hub
 
     public async Task RequestNewRelief(string filename)
     {
-        _logger.LogInformation(filename + " hochgeladen");
-        await Clients.Group("backend").SendAsync("NewReliefTask", filename, Context.ConnectionId);
+        Worker? worker = GetWorker();
+        string? workerId = worker != null ? worker.id : null;
+
+        if (worker != null && workerId != null)
+        {
+            _logger.LogInformation(filename + " hochgeladen für " + workerId);
+            worker.increaseTaskCount();
+            await Clients.Client(workerId).SendAsync("NewReliefTask", filename, Context.ConnectionId);
+        }
+
     }
+    public async Task RequestNewDummyTask()
+    {
+        Worker? worker = GetWorker();
+        string? workerId = worker != null ? worker.id : null;
+
+        if (worker != null && workerId != null)
+        {
+            _logger.LogInformation("dummy task gestartet für " + workerId);
+            worker.increaseTaskCount();
+            await Clients.Client(workerId).SendAsync("NewDummyTask", Context.ConnectionId);
+        }
+    }
+
+
     
     public async Task NotifyFrontendAboutManipulatedMesh(string filename, string frontendClientId)
     {
