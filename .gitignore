@@ -26,5 +26,5 @@ dist-ssr
 /signalRServer/bin/
 /signalRServer/obj/
 /signalRServer/Uploads/
-/backend/__pycache__
-/backend/files
+/worker/__pycache__
+/worker/files
