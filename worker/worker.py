@@ -90,6 +90,7 @@ def pretend_to_work(data):
     
 def handle_relief(data):
     print("relief angeforderd")
+    frontend_id = data[1]
     local_image_path = f"files/{data[0]}"
     local_stl_path = f"files/{data[0][:-4]}.stl"
 
@@ -97,15 +98,22 @@ def handle_relief(data):
     urllib.request.urlretrieve(f"http://localhost:5500/download/{data[0]}", local_image_path)
     print("datei runtergeladen")
 
-    # creating reliev model
-    heightmap.create_relief(local_image_path, local_stl_path)
+    try:
+        # creating reliev model
+        heightmap.create_relief(local_image_path, local_stl_path)
 
-    # upload of manipulated file to server
-    file = {'file': open(local_stl_path, 'rb')}
-    r = requests.post(url='http://localhost:5500/upload', files=file)
+        # upload of manipulated file to server
+        file = {'file': open(local_stl_path, 'rb')}
+        r = requests.post(url='http://localhost:5500/upload', files=file)
 
-    # informing frontend
-    hub_connection.send("NotifyFrontendAboutManipulatedMesh", [f"{data[0][:-4]}.stl", data[1]])
+        # informing frontend
+        hub_connection.send("NotifyFrontendAboutManipulatedMesh", [f"{data[0][:-4]}.stl", frontend_id])
+    except:
+        hub_connection.send("NotifyFrontendAboutManipulationError", [frontend_id])
+
+    os.remove(local_image_path)
+    os.remove(local_stl_path)
+
 
 def connect_with_retry():
     # creating signalR client and trying to connect to ASP.NET till connection is established
