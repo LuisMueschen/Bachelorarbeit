@@ -35,9 +35,9 @@ WORKDIR /pyoctree
 RUN printf "[build-system]\nrequires = [\"setuptools>=42\", \"wheel\", \"cython\", \"numpy\"] \nbuild-backend = \"setuptools.build_meta\"" > pyproject.toml
 RUN pip install .
 
-RUN pip install signalrcore numpy Flask flask_cors cmake stl
+RUN pip install signalrcore numpy cmake stl pillow trimesh
 
-RUN mkdir backend
-WORKDIR /backend
+RUN mkdir worker
+WORKDIR /worker
 COPY . .
-CMD [ "python", "backend.py" ]
+CMD [ "python", "worker.py" ]

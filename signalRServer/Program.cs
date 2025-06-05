@@ -16,27 +16,32 @@ builder.Services.AddCors(options =>
     });
 });
 
-// SignalR-Dienste registrieren
 builder.Services.AddSignalR();
-
 builder.Services.AddControllers();
 
 builder.WebHost.UseUrls("http://0.0.0.0:5500");
 
-// Logging auf Debug-Level setzen
+// setting log level to debug
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
-builder.Logging.SetMinimumLevel(LogLevel.Debug); // oder LogLevel.Trace für noch mehr Details
+builder.Logging.SetMinimumLevel(LogLevel.Debug);
 
 var app = builder.Build();
 
 app.UseCors();
 
-// Routen definieren
+// defining routes
 app.MapHub<MyHub>("/myhub");
 app.UseRouting();
 app.MapControllers();
 
+var uploadPath = Path.Combine(app.Environment.ContentRootPath, "Uploads");
+if (!Directory.Exists(uploadPath))
+{
+    Directory.CreateDirectory(uploadPath);
+}
+
+// reacting to press of "w" key during runtime to print workerlist
 _ = Task.Run(() =>
 {
     while (true)

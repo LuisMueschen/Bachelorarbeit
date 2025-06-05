@@ -35,4 +35,4 @@ def create_relief(image_path, output_path, scale_x=1.0, scale_y=1.0, scale_z=1.0
     
     print("done")
     mesh = trimesh.Trimesh(vertices=vertices, faces=faces)
-    mesh.export(f'uploads/{output_path}')
+    mesh.export(output_path)

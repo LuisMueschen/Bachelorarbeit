@@ -16,7 +16,6 @@ def check_connection(args):
 
 def start_new_scraping_task(data):
     task_thread = threading.Thread(target=handle_scraping, args=data)
-    task_thread.daemon = True
     task_thread.start()
 
 # scraping event 
@@ -91,8 +90,22 @@ def pretend_to_work(data):
     
 def handle_relief(data):
     print("relief angeforderd")
-    heightmap.create_relief(data[0], "test.stl")
-    hub_connection.send("NotifyFrontendAboutManipulatedMesh", [data[0], data[1]])
+    local_image_path = f"files/{data[0]}"
+    local_stl_path = f"files/{data[0][:-4]}.stl"
+
+    # retrieving image file from server
+    urllib.request.urlretrieve(f"http://localhost:5500/download/{data[0]}", local_image_path)
+    print("datei runtergeladen")
+
+    # creating reliev model
+    heightmap.create_relief(local_image_path, local_stl_path)
+
+    # upload of manipulated file to server
+    file = {'file': open(local_stl_path, 'rb')}
+    r = requests.post(url='http://localhost:5500/upload', files=file)
+
+    # informing frontend
+    hub_connection.send("NotifyFrontendAboutManipulatedMesh", [f"{data[0][:-4]}.stl", data[1]])
 
 def connect_with_retry():
     # creating signalR client and trying to connect to ASP.NET till connection is established

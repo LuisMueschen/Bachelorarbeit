@@ -181,6 +181,7 @@ public class MyHub : Hub
         }
 
     }
+    
     public async Task RequestNewDummyTask()
     {
         Worker? worker = GetWorker();
@@ -193,8 +194,6 @@ public class MyHub : Hub
             await Clients.Client(workerId).SendAsync("NewDummyTask", Context.ConnectionId);
         }
     }
-
-
     
     public async Task NotifyFrontendAboutManipulatedMesh(string filename, string frontendClientId)
     {

@@ -36,6 +36,8 @@ public class FileController : ControllerBase
         var content = System.IO.File.ReadAllBytes(filePath);
         var mimeType = "application/octet-stream";
 
+        Console.WriteLine(filename + " Runtergeladen");
+
         return File(content, mimeType, filename);
     }
 }
