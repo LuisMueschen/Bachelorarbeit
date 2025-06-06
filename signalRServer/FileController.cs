@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 [Route("[controller]")]
 public class FileController : ControllerBase
 {
+    [RequestSizeLimit(104857600)]
     [HttpPost("/upload")]
     public async Task<IActionResult> Upload(IFormFile file)
     {
@@ -19,12 +20,16 @@ public class FileController : ControllerBase
         {
             await file.CopyToAsync(stream);
         }
+
+        Console.WriteLine(file.FileName + " Hochgeladen");
+
         return Ok(new { FileName = file.FileName });
     }
 
     [HttpGet("/download/{filename}")]
     public IActionResult Download(string filename)
     {
+        Console.WriteLine("am anfang von download");
         string uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
         string filePath = Path.Combine(uploadPath, filename);
 
