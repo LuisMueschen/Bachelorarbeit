@@ -4,7 +4,7 @@ import os
 import threading
 import auskratzen
 import tempfile
-import heightmap
+import reliefCreator
 import urllib
 import logging
 import requests
@@ -100,7 +100,7 @@ def handle_relief(data):
 
     try:
         # creating reliev model
-        heightmap.create_relief(local_image_path, local_stl_path)
+        reliefCreator.create_relief(local_image_path, local_stl_path)
 
         # upload of manipulated file to server
         file = {'file': open(local_stl_path, 'rb')}
