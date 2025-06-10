@@ -28,7 +28,7 @@ async function downloadFileIntoScene(filename: string): Promise<File>{
   return file;
 };
 
-export function requestScraping(file: File, message: Object){  
+export function requestScraping(file: File, parameters: Object){  
   const formData = new FormData();
   formData.append('file', file);
 
@@ -43,7 +43,7 @@ export function requestScraping(file: File, message: Object){
     .then((response) => {
       console.log(response.filename, 'hochgeladen');
       // Inform Backend about Upload and request execution of scraping script
-      connection.invoke('RequestScraping', message);
+      connection.invoke('RequestScraping', parameters);
     })
     .catch((err) => console.log("Fehler beim Upload:", err));
   }else{
@@ -51,7 +51,7 @@ export function requestScraping(file: File, message: Object){
   }
 }
 
-export function uploadImage(file: File){
+export function uploadImage(file: File, parameters: Object){
   const formData = new FormData();
   formData.append('file', file)
 
@@ -60,7 +60,7 @@ export function uploadImage(file: File){
     body: formData
   }).then((res) => res.json())
   .then(() => {
-    connection.invoke("requestNewRelief", file.name)    
+    connection.invoke("requestNewRelief", parameters)    
   })
 }
 

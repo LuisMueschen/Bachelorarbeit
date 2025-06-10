@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.SignalR;
 
-public class TaskMessage
+public class ScrapingParameters
 {
     public required float[][] selections { get; set; }
     public required string supportDiameter { get; set; }
@@ -10,6 +10,15 @@ public class TaskMessage
     public required string targetTopThickness { get; set; }
     public required string fileToUse { get; set; }
     public required string finalFilename { get; set; }
+}
+
+public class ReliefParameters
+{
+    public required string filename { get; set; }
+    public required string scaleX { get; set; }
+    public required string scaleY { get; set; }
+    public required string scaleZ { get; set; }
+    public required bool invert { get; set; }
 }
 
 class Worker
@@ -129,7 +138,7 @@ public class MyHub : Hub
         await Clients.Group("frontend").SendAsync("ReceiveMessage", payload);
     }
 
-    public async Task RequestScraping(TaskMessage message)
+    public async Task RequestScraping(ScrapingParameters parameters)
     {
         Worker? worker = GetWorker();
         string? workerId = worker != null ? worker.id : null;
@@ -138,27 +147,27 @@ public class MyHub : Hub
         {
             _logger.LogInformation("Auskratzen mit folgenden Parametern angefordert: \n" +
                 "WorkerId: " + workerId + "\n\n" +
-                "Punkte: " + message.selections + "\n" +
-                "Stützendurchmesser: " + message.supportDiameter + "\n" +
-                "Randdicke: " + message.edgeWidth + "\n" +
-                "Übergangsbreite: " + message.transitionWidth + "\n" +
-                "Okklusaldicke: " + message.targetTopThickness + "\n" +
-                "Wanddicke: " + message.targetWallThickness + "\n" +
-                "Dateiname alt: " + message.fileToUse + "\n" +
-                "Dateiname neu: " + message.finalFilename + "\n"
+                "Punkte: " + parameters.selections + "\n" +
+                "Stützendurchmesser: " + parameters.supportDiameter + "\n" +
+                "Randdicke: " + parameters.edgeWidth + "\n" +
+                "Übergangsbreite: " + parameters.transitionWidth + "\n" +
+                "Okklusaldicke: " + parameters.targetTopThickness + "\n" +
+                "Wanddicke: " + parameters.targetWallThickness + "\n" +
+                "Dateiname alt: " + parameters.fileToUse + "\n" +
+                "Dateiname neu: " + parameters.finalFilename + "\n"
             );
 
             worker.increaseTaskCount();
             await Clients.Client(workerId).SendAsync("NewScrapingTask", new
             {
-                selections = message.selections,
-                supportDiameter = message.supportDiameter,
-                edgeWidth = message.edgeWidth,
-                transitionWidth = message.transitionWidth,
-                targetWallThickness = message.targetWallThickness,
-                targetTopThickness = message.targetTopThickness,
-                fileToUse = message.fileToUse,
-                finalFilename = message.finalFilename,
+                selections = parameters.selections,
+                supportDiameter = parameters.supportDiameter,
+                edgeWidth = parameters.edgeWidth,
+                transitionWidth = parameters.transitionWidth,
+                targetWallThickness = parameters.targetWallThickness,
+                targetTopThickness = parameters.targetTopThickness,
+                fileToUse = parameters.fileToUse,
+                finalFilename = parameters.finalFilename,
                 connectionID = Context.ConnectionId
             });
         }
@@ -168,16 +177,31 @@ public class MyHub : Hub
         }
     }
 
-    public async Task RequestNewRelief(string filename)
+    public async Task RequestNewRelief(ReliefParameters parameters)
     {
         Worker? worker = GetWorker();
         string? workerId = worker != null ? worker.id : null;
 
         if (worker != null && workerId != null)
         {
-            _logger.LogInformation(filename + " hochgeladen für " + workerId);
+            _logger.LogInformation("Relief mit folgenden Parametern angefordert:\n" +
+                "filename: " + parameters.filename + "\n" +
+                "scaleX: " + parameters.scaleX + "\n" +
+                "scaleY: " + parameters.scaleY + "\n" +
+                "scaleZ: " + parameters.scaleZ + "\n" +
+                "invert: " + parameters.invert + "\n"
+            );
+
             worker.increaseTaskCount();
-            await Clients.Client(workerId).SendAsync("NewReliefTask", filename, Context.ConnectionId);
+            await Clients.Client(workerId).SendAsync("NewReliefTask", new
+            {
+                filename = parameters.filename,
+                scaleX = parameters.scaleX,
+                scaleY = parameters.scaleY,
+                scaleZ = parameters.scaleZ,
+                invert = parameters.invert,
+                connectionID = Context.ConnectionId
+            });
         }
 
     }

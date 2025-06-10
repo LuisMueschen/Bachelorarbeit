@@ -92,28 +92,39 @@ def pretend_to_work(data):
     hub_connection.send("NotifyFrontendAboutManipulationError", [data[0]])
     
 def handle_relief(data):
-    frontend_id = data[1]
-    local_image_path = f"files/{data[0]}"
-    local_stl_path = f"files/{data[0][:-4]}.stl"
+    frontend_id = data[0]['connectionID']
+    filename = data[0]['filename']
+    scale_x = float(data[0]['scaleX'])
+    scale_y = float(data[0]['scaleY'])
+    scale_z = float(data[0]['scaleZ'])
+    invert = bool(data[0]['invert'])
+    print(scale_x)
+    print(scale_y)
+    print(scale_z)
+    print(invert)
+    local_image_path = f"files/{filename}"
+    local_stl_path = f"files/{filename[:-4]}.stl"
     print(local_image_path)
     print(local_stl_path)
 
     # Properly encode the filename for URL usage
-    encoded_filename = urllib.parse.quote(data[0])
+    encoded_filename = urllib.parse.quote(filename)
     # retrieving image file from server
     urllib.request.urlretrieve(f"http://localhost:5500/download/{encoded_filename}", local_image_path)
 
     try:
         # creating reliev model
-        reliefCreator.create_relief(local_image_path, local_stl_path)
+        reliefCreator.create_relief(local_image_path, local_stl_path, scale_x, scale_y, scale_z, invert)
 
         # upload of manipulated file to server
         file = {'file': open(local_stl_path, 'rb')}
         r = requests.post(url='http://localhost:5500/upload', files=file)
+        print("relief hochgeladen")
 
         # informing frontend
-        hub_connection.send("NotifyFrontendAboutManipulatedMesh", [f"{data[0][:-4]}.stl", frontend_id])
-    except:
+        hub_connection.send("NotifyFrontendAboutManipulatedMesh", [f"{filename[:-4]}.stl", frontend_id])
+    except Exception as e:
+        print(e)
         hub_connection.send("NotifyFrontendAboutManipulationError", [frontend_id])
 
     os.remove(local_image_path)

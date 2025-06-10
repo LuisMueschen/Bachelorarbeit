@@ -230,31 +230,76 @@ function createMeshInterface(
 }
 
 function createImageInterface(file: File){
-  const div = document.createElement("div")
-  div.className = 'objectDiv'
+  // Creating Div to contain this interface part
+  const objectDiv = document.createElement("div")
+  objectDiv.className = 'objectDiv'
 
+  // Label displaying Filename for this interface
   const filenameLabel = document.createElement("label");
   filenameLabel.textContent = file.name;
   filenameLabel.className = "filenameLabel"
-  div.appendChild(filenameLabel)
+  objectDiv.appendChild(filenameLabel)
 
+  // Input elements for parameters for Relief creation
+  const scaleXLabel = document.createElement("label");
+  const scaleXInput = document.createElement("input");
+  scaleXInput.type = "number";
+  scaleXInput.value = "1.0"
+  scaleXInput.step = "0.1"
+  scaleXLabel.textContent = "X-Skalierung"
+  objectDiv.appendChild(scaleXLabel)
+  objectDiv.appendChild(scaleXInput)
+
+  const scaleYLabel = document.createElement("label");
+  const scaleYInput = document.createElement("input");
+  scaleYInput.type = "number";
+  scaleYInput.value = "1.0"
+  scaleYInput.step = "0.1"
+  scaleYLabel.textContent = "Y-Skalierung"
+  objectDiv.appendChild(scaleYLabel)
+  objectDiv.appendChild(scaleYInput)
+
+  const scaleZLabel = document.createElement("label");
+  const scaleZInput = document.createElement("input");
+  scaleZInput.type = "number";
+  scaleZInput.value = "1.0"
+  scaleZInput.step = "0.1"
+  scaleZLabel.textContent = "Z-Skalierung"
+  objectDiv.appendChild(scaleZLabel)
+  objectDiv.appendChild(scaleZInput)
+
+  const invertLabel = document.createElement("label");
+  const invertInput = document.createElement("input");
+  invertInput.type = "checkbox"
+  invertLabel.textContent = "Invertieren"
+  objectDiv.appendChild(invertLabel)
+  objectDiv.appendChild(invertInput)
+
+  // Button to start creation of Relief
   const uploadButton = document.createElement("button")
-  uploadButton.onclick = () => {
-    uploadImage(file)
+  uploadButton.onclick = () => {    
+    uploadImage(file, {
+      filename: file.name,
+      scaleX: scaleXInput.value as unknown as number,      
+      scaleY: scaleYInput.value as unknown as number,      
+      scaleZ: scaleZInput.value as unknown as number,
+      invert: invertInput.checked as unknown as boolean
+    })
   }
   uploadButton.textContent = "hochladen"
-  div.appendChild(uploadButton)
+  objectDiv.appendChild(uploadButton)
 
+  // Button to remove this image interface
   const deleteButton = document.createElement('button');
   deleteButton.name = file.name;
   deleteButton.textContent = `löschen`;
   deleteButton.className = 'deleteBtn';
   deleteButton.onclick = () => {
-    document.getElementById('interface')?.removeChild(div);
+    document.getElementById('interface')?.removeChild(objectDiv);
   }
-  div.appendChild(deleteButton)
+  objectDiv.appendChild(deleteButton)
 
-  document.getElementById('interface')?.appendChild(div)
+  document.getElementById('interface')?.appendChild(objectDiv)
 }
 
 function setupMeshInteraction(mesh: BABYLON.Mesh){

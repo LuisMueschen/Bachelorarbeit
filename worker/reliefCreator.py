@@ -41,5 +41,5 @@ def create_relief(image_path, output_path, scale_x=1.0, scale_y=1.0, scale_z=1.0
     print("faces erstellt")
     
     mesh = trimesh.Trimesh(vertices=vertices, faces=faces)
-    mesh.export(output_path)
     print("Relief erstellt")
+    mesh.export(output_path)
