@@ -8,6 +8,7 @@ def create_relief(image_path, output_path, scale_x=1.0, scale_y=1.0, scale_z=1.0
 
     # heightmap als 2-Dim Array erstellen
     heightmap = np.array(img, dtype=np.float32)
+    print("heightmap erstellt")
 
     if invert:
         heightmap = 255 - heightmap
@@ -26,6 +27,7 @@ def create_relief(image_path, output_path, scale_x=1.0, scale_y=1.0, scale_z=1.0
             # z = Höhenwert an Koordinate x,y
             z = heightmap[y, x]
             vertices.append((x * scale_x, y * scale_y, z))
+    print("vertices erstellt")
 
     # Funktion um 2-Dim Arrayindex zu 1-Dim Index umzuwandeln
     def idx(x, y): return y * w + x
@@ -36,6 +38,7 @@ def create_relief(image_path, output_path, scale_x=1.0, scale_y=1.0, scale_z=1.0
             # Zwei Dreiecke pro Quadrat - um Koordinaten nicht doppelt zu speichern werden im faces array nur Indizes des vertices array gespeichert
             faces.append([idx(x, y), idx(x+1, y), idx(x, y+1)])
             faces.append([idx(x+1, y), idx(x+1, y+1), idx(x, y+1)])
+    print("faces erstellt")
     
     mesh = trimesh.Trimesh(vertices=vertices, faces=faces)
     mesh.export(output_path)

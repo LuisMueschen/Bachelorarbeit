@@ -23,7 +23,7 @@ public class FileController : ControllerBase
 
         Console.WriteLine(file.FileName + " Hochgeladen");
 
-        return Ok(new { FileName = file.FileName });
+        return Ok(new { filename = file.FileName });
     }
 
     [HttpGet("/download/{filename}")]

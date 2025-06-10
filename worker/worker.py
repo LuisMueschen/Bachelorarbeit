@@ -52,8 +52,11 @@ def handle_scraping(data):
             line = " ".join(map(str, point))
             file.write(line + "\n")
 
-    # downloading file to manipulate
-    urllib.request.urlretrieve(f"http://localhost:5500/download/{data[0]['fileToUse']}", file_to_use)
+    # Properly encode the filename for URL usage
+    encoded_filename = urllib.parse.quote(data[0]["fileToUse"])
+
+    # retrieving stl file from server
+    urllib.request.urlretrieve(f"http://localhost:5500/download/{encoded_filename}", file_to_use)
 
     try:
         auskratzen.modell_auskratzen(
@@ -89,14 +92,16 @@ def pretend_to_work(data):
     hub_connection.send("NotifyFrontendAboutManipulationError", [data[0]])
     
 def handle_relief(data):
-    print("relief angeforderd")
     frontend_id = data[1]
     local_image_path = f"files/{data[0]}"
     local_stl_path = f"files/{data[0][:-4]}.stl"
+    print(local_image_path)
+    print(local_stl_path)
 
+    # Properly encode the filename for URL usage
+    encoded_filename = urllib.parse.quote(data[0])
     # retrieving image file from server
-    urllib.request.urlretrieve(f"http://localhost:5500/download/{data[0]}", local_image_path)
-    print("datei runtergeladen")
+    urllib.request.urlretrieve(f"http://localhost:5500/download/{encoded_filename}", local_image_path)
 
     try:
         # creating reliev model
