@@ -1,8 +1,9 @@
 import { selectedCoordinates, coordinateSpheres, addMeshToScene } from "./main";
 import * as signalR from "@microsoft/signalr";
 
-// Server adresses
-export const serverAdress = 'http://localhost:5500'
+// retrieving adress from config.json
+const config = await fetch("../cfg/config.json").then(res => res.json()).then(data => data)
+export const serverAdress = config["serverAdress"]
 
 // Connection to ASP.NET Server
 const connection = new signalR.HubConnectionBuilder()
@@ -96,8 +97,6 @@ connection.on("ReceiveMessage", (data) => {
 const dummyTaskButton = document.createElement("button");
 dummyTaskButton.textContent = 'Dummy Task starten'
 dummyTaskButton.onclick = () => {
-  console.log("triggered");
-  
   connection.invoke("RequestNewDummyTask")
 }
 document.getElementById("interface")?.appendChild(dummyTaskButton)

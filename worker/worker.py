@@ -8,6 +8,10 @@ import reliefCreator
 import urllib
 import logging
 import requests
+import json
+
+with open("cfg/config.json", 'r') as config:
+    server_adress = json.load(config)["serverAdress"]
 
 # debug event
 def check_connection(args):
@@ -66,7 +70,7 @@ def handle_scraping(data):
     encoded_filename = urllib.parse.quote(data[0]["fileToUse"])
 
     # retrieving stl file from server
-    urllib.request.urlretrieve(f"http://localhost:5500/download/{encoded_filename}", file_to_use)
+    urllib.request.urlretrieve(f"{server_adress}/download/{encoded_filename}", file_to_use)
 
     try:
         # calling scraping script with parameters
@@ -83,7 +87,7 @@ def handle_scraping(data):
 
         # upload of manipulated file to server
         files = {'file': open(final_filename, 'rb')}
-        r = requests.post(url='http://localhost:5500/upload', files=files)
+        r = requests.post(url=f'{server_adress}/upload', files=files)
         
         # informing frontend that task is finished and file is available to download
         hub_connection.send("NotifyFrontendAboutManipulatedMesh", [data[0]["finalFilename"], connection_id])
@@ -124,7 +128,7 @@ def handle_relief(data):
     # Properly encode the filename for URL usage
     encoded_filename = urllib.parse.quote(filename)
     # retrieving image file from server
-    urllib.request.urlretrieve(f"http://localhost:5500/download/{encoded_filename}", local_image_path)
+    urllib.request.urlretrieve(f"{server_adress}/download/{encoded_filename}", local_image_path)
 
     try:
         # creating reliev model
@@ -132,7 +136,7 @@ def handle_relief(data):
 
         # upload of manipulated file to server
         file = {'file': open(local_stl_path, 'rb')}
-        r = requests.post(url='http://localhost:5500/upload', files=file)
+        r = requests.post(url=f'{server_adress}/upload', files=file)
         print("relief hochgeladen")
 
         # informing frontend
@@ -158,7 +162,7 @@ def connect_with_retry():
     # creating signalR client and trying to connect to ASP.NET till connection is established
     while True:
         try:
-            hub_connection = HubConnectionBuilder().with_url('http://localhost:5500/myhub').build()
+            hub_connection = HubConnectionBuilder().with_url(f'{server_adress}/myhub').build()
             hub_connection.on('CheckConnection', check_connection)
             hub_connection.on('NewScrapingTask', handle_scraping)
             hub_connection.on('NewReliefTask', handle_relief)
