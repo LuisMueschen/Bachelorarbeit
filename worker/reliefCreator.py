@@ -3,43 +3,42 @@ import numpy as np
 import trimesh
 
 def create_relief(image_path, output_path, scale_x=1.0, scale_y=1.0, scale_z=1.0, invert=False):
-    # Bild laden und in Graustufen umwandeln
+    # Load image and convert to grayscale
     img = Image.open(image_path).convert('L')
 
-    # heightmap als 2-Dim Array erstellen
+    # Create heightmap as 2D array
     heightmap = np.array(img, dtype=np.float32)
-    print("heightmap erstellt")
+    print("heightmap created")
 
     if invert:
         heightmap = 255 - heightmap
 
-    # heightmap werte auf werte zwischen 0 und scale_z normalisieren
+    # Normalize heightmap values to range between 0 and scale_z
     heightmap *= scale_z / 255.0
 
-    # Höhe und Breite von heigtmap
+    # Height and width of heightmap
     h, w = heightmap.shape
     vertices = []
     faces = []
 
-    # Über Pixel in Bild / Koordinaten in Heightmap itterieren und Koordinaten mit Höhenwert als Vertices erstellen
+    # Iterate over pixels in image / coordinates in heightmap and create vertices with height value from heightmap
     for y in range(h):
         for x in reversed(range(w)):
-            # z = Höhenwert an Koordinate x,y
-            z = heightmap[y, x]
-            vertices.append((x * scale_x, y * scale_y, z))
-    print("vertices erstellt")
+            # z = height value at coordinate x, y
+            vertices.append((x * scale_x, y * scale_y, heightmap[y, x]))
+    print("vertices created")
 
-    # Funktion um 2-Dim Arrayindex zu 1-Dim Index umzuwandeln
+    # Function to convert 2D array index to 1D index
     def idx(x, y): return y * w + x
 
-    # Über Pixel in Bild / Koordinaten in Heightmap itterieren und mit idx funktion faces erstellen
+    # Iterate over pixels in image / coordinates in heightmap and create faces using idx function
     for y in range(h - 1):
         for x in reversed(range(w - 1)):
-            # Zwei Dreiecke pro Quadrat - um Koordinaten nicht doppelt zu speichern werden im faces array nur Indizes des vertices array gespeichert
+            # Two triangles per square - to avoid storing coordinates twice, only indices of the vertices array are stored in the faces array
             faces.append([idx(x, y), idx(x+1, y), idx(x, y+1)])
             faces.append([idx(x+1, y), idx(x+1, y+1), idx(x, y+1)])
-    print("faces erstellt")
+    print("faces created")
     
     mesh = trimesh.Trimesh(vertices=vertices, faces=faces)
-    print("Relief erstellt")
+    print("Relief created")
     mesh.export(output_path)
