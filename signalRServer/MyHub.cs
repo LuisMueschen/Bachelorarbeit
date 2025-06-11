@@ -1,50 +1,5 @@
 using Microsoft.AspNetCore.SignalR;
 
-public class ScrapingParameters
-{
-    public required float[][] selections { get; set; }
-    public required string supportDiameter { get; set; }
-    public required string edgeWidth { get; set; }
-    public required string transitionWidth { get; set; }
-    public required string targetWallThickness { get; set; }
-    public required string targetTopThickness { get; set; }
-    public required string fileToUse { get; set; }
-    public required string finalFilename { get; set; }
-}
-
-public class ReliefParameters
-{
-    public required string filename { get; set; }
-    public required string scaleX { get; set; }
-    public required string scaleY { get; set; }
-    public required string scaleZ { get; set; }
-    public required bool invert { get; set; }
-}
-
-class Worker
-{
-    public string id;
-    private int taskCount = 0;
-
-    public Worker(string workerId)
-    {
-        id = workerId;
-    }
-    public int getTaskCount()
-    {
-        return taskCount;
-    }
-
-    public void increaseTaskCount()
-    {
-        taskCount++;
-    }
-
-    public void decreaseTaskCount()
-    {
-        taskCount--;
-    }
-}
 public class MyHub : Hub
 {
     private readonly ILogger<MyHub> _logger;
