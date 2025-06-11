@@ -12,7 +12,7 @@ public class ScrapingParameters
 
 public class ReliefParameters
 {
-    public required float filename { get; set; }
+    public required string filename { get; set; }
     public required float scaleX { get; set; }
     public required float scaleY { get; set; }
     public required float scaleZ { get; set; }

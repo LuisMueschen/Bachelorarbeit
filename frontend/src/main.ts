@@ -196,11 +196,11 @@ function createMeshInterface(
       requestScraping(file, {
       // necessary parameters for scraping
       selections: selectedCoordinates[file.name],
-      supportDiameter: supportDiameterInput.value as unknown as number,
-      edgeWidth: edgeWidthInput.value as unknown as number,
-      transitionWidth: transitionWidthInput.value as unknown as number,
-      targetWallThickness: targetWallThicknessInput.value as unknown as number,
-      targetTopThickness: targetTopThicknessInput.value as unknown as number,
+      supportDiameter: Number(supportDiameterInput.value),
+      edgeWidth:  Number(edgeWidthInput.value),
+      transitionWidth: Number(transitionWidthInput.value),
+      targetWallThickness: Number(targetWallThicknessInput.value),
+      targetTopThickness: Number(targetTopThicknessInput.value),
       fileToUse: file.name,
       finalFilename: finalFilenameInput.value
       });
@@ -280,10 +280,10 @@ function createImageInterface(file: File){
   uploadButton.onclick = () => {    
     uploadImage(file, {
       filename: file.name,
-      scaleX: scaleXInput.value as unknown as number,      
-      scaleY: scaleYInput.value as unknown as number,      
-      scaleZ: scaleZInput.value as unknown as number,
-      invert: invertInput.checked as unknown as boolean
+      scaleX: Number(scaleXInput.value),
+      scaleY: Number(scaleYInput.value),
+      scaleZ: Number(scaleZInput.value),
+      invert: invertInput.checked
     })
   }
   uploadButton.textContent = "hochladen"
