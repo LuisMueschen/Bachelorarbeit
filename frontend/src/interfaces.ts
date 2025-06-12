@@ -26,6 +26,7 @@ export function createMeshInterface(
   const supportDiameterInput = document.createElement("input")
   supportDiameterInput.type = "number"
   supportDiameterInput.value = "1.5"
+  supportDiameterInput.min = "0.1"
   supportDiameterInput.id = "supportDiameterInput"
   supportDiameterLabel.textContent = "Durchmesser der Stütze in mm"
   objectDiv.appendChild(supportDiameterLabel)
@@ -35,6 +36,7 @@ export function createMeshInterface(
   const edgeWidthInput = document.createElement("input")
   edgeWidthInput.type = "number"
   edgeWidthInput.value = "2"
+  edgeWidthInput.min = "0.1"
   edgeWidthInput.id = "edgeWidthInput"
   edgeWidthLabel.textContent = "Breite des Randes in mm"
   objectDiv.appendChild(edgeWidthLabel)
@@ -44,6 +46,7 @@ export function createMeshInterface(
   const transitionWidthInput = document.createElement("input")
   transitionWidthInput.type = "number"
   transitionWidthInput.value = "1"
+  transitionWidthInput.min = "0.1"
   transitionWidthInput.id = "transitionWidthInput"
   transitionWidthLabel.textContent = "Breite des Übergangs in mm"
   objectDiv.appendChild(transitionWidthLabel)
@@ -53,6 +56,7 @@ export function createMeshInterface(
   const targetWallThicknessInput = document.createElement("input")
   targetWallThicknessInput.type = "number"
   targetWallThicknessInput.value = "0.3"
+  targetWallThicknessInput.min = "0.1"
   targetWallThicknessInput.id = "targetWallThicknessInput"
   targetWallThicknessLabel.textContent = "Gewünschte Wandstärke in mm"
   objectDiv.appendChild(targetWallThicknessLabel)
@@ -62,6 +66,7 @@ export function createMeshInterface(
   const targetTopThicknessInput = document.createElement("input")
   targetTopThicknessInput.type = "number"
   targetTopThicknessInput.value = "0.5"
+  targetTopThicknessInput.min = "0.1"
   targetTopThicknessInput.id = "targetTopThicknessInput"
   targetTopThicknessLabel.textContent = "Gewünschte Okklusalstärke in mm"
   objectDiv.appendChild(targetTopThicknessLabel)
@@ -176,6 +181,7 @@ export function createImageInterface(file: File){
   const scaleXInput = document.createElement("input");
   scaleXInput.type = "number";
   scaleXInput.value = "1.0"
+  scaleXInput.min = "0.1"
   scaleXInput.step = "0.1"
   scaleXLabel.textContent = "X-Skalierung"
   objectDiv.appendChild(scaleXLabel)
@@ -185,6 +191,7 @@ export function createImageInterface(file: File){
   const scaleYInput = document.createElement("input");
   scaleYInput.type = "number";
   scaleYInput.value = "1.0"
+  scaleYInput.min = "0.1"
   scaleYInput.step = "0.1"
   scaleYLabel.textContent = "Y-Skalierung"
   objectDiv.appendChild(scaleYLabel)
@@ -194,6 +201,7 @@ export function createImageInterface(file: File){
   const scaleZInput = document.createElement("input");
   scaleZInput.type = "number";
   scaleZInput.value = "1.0"
+  scaleZInput.min = "0.1"
   scaleZInput.step = "0.1"
   scaleZLabel.textContent = "Z-Skalierung"
   objectDiv.appendChild(scaleZLabel)
