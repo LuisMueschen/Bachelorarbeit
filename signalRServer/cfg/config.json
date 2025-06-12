@@ -1,0 +1,7 @@
+{
+    "address": "http://localhost:5500",
+    "fileCleanup": {
+        "FileSaveDuration": 10,
+        "UploadPath": "Uploads"
+    }
+}

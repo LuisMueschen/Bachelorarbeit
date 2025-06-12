@@ -1,9 +1,17 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 [ApiController]
 [Route("[controller]")]
 public class FileController : ControllerBase
 {
+    private readonly FileCleanupConfig _fileCleanupConfig;
+
+    public FileController(IOptions<FileCleanupConfig> fileCleanupConfig)
+    {
+        _fileCleanupConfig = fileCleanupConfig.Value;
+    }
+    
     [RequestSizeLimit(104857600)]
     [HttpPost("/upload")]
     public async Task<IActionResult> Upload(IFormFile file)
@@ -13,7 +21,7 @@ public class FileController : ControllerBase
             return BadRequest("Keine Datei hochgeladen");
         }
 
-        string uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
+        string uploadPath = Path.Combine(Directory.GetCurrentDirectory(), _fileCleanupConfig.UploadPath);
         string filePath = Path.Combine(uploadPath, file.FileName);
 
         using (FileStream stream = new FileStream(filePath, FileMode.Create))
@@ -30,7 +38,7 @@ public class FileController : ControllerBase
     public IActionResult Download(string filename)
     {
         Console.WriteLine("am anfang von download");
-        string uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
+        string uploadPath = Path.Combine(Directory.GetCurrentDirectory(), _fileCleanupConfig.UploadPath);
         string filePath = Path.Combine(uploadPath, filename);
 
         if (!System.IO.File.Exists(filePath))

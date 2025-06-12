@@ -1,5 +1,9 @@
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Configuration.AddJsonFile("cfg/config.json", optional: false, reloadOnChange: true);
+
+builder.Services.Configure<FileCleanupConfig>(builder.Configuration.GetSection("fileCleanup"));
+
 // CORS hinzufügen
 builder.Services.AddCors(options =>
 {
@@ -15,8 +19,19 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddSignalR();
 builder.Services.AddControllers();
+builder.Services.AddHostedService<FileCleanupService>();
 
-builder.WebHost.UseUrls("http://0.0.0.0:5500");
+var address = builder.Configuration["address"];
+if (address != null)
+{
+    builder.WebHost.UseUrls(address);
+}
+
+var uploadPath = builder.Configuration.GetSection("fileCleanup")["uploadPath"];
+if (uploadPath != null && !Directory.Exists(uploadPath))
+{
+    Directory.CreateDirectory(uploadPath);
+}
 
 // setting log level to debug
 builder.Logging.ClearProviders();
@@ -31,12 +46,6 @@ app.UseCors();
 app.MapHub<MyHub>("/myhub");
 app.UseRouting();
 app.MapControllers();
-
-var uploadPath = Path.Combine(app.Environment.ContentRootPath, "Uploads");
-if (!Directory.Exists(uploadPath))
-{
-    Directory.CreateDirectory(uploadPath);
-}
 
 // reacting to press of "w" key during runtime to print workerlist
 _ = Task.Run(() =>
