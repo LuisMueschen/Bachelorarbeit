@@ -38,7 +38,7 @@ def handle_scraping(data):
     target_top_thickness = float(data[0]['targetTopThickness'])
     file_to_use = data[0]['fileToUse']
     final_filename = data[0]['finalFilename']
-    connection_id = data[0]["connectionID"] 
+    frontend_id = data[0]["connectionID"] 
     print(f'Punkte: {selections}')
     print(f'Stützendurchmesser: {support_diameter}')
     print(f'Randbreite: {edge_width}')
@@ -88,12 +88,18 @@ def handle_scraping(data):
         # upload of manipulated file to server
         files = {'file': open(final_filename, 'rb')}
         r = requests.post(url=f'{server_adress}/upload', files=files)
+
+        # checking if file was succesfully uploaded
+        if r.status_code != 200:
+            hub_connection.send("ManipulationError", [frontend_id])
+            print("upload fehlgeschlagen")
+            return
         
         # informing frontend that task is finished and file is available to download
-        hub_connection.send("NotifyFrontendAboutManipulatedMesh", [data[0]["finalFilename"], connection_id])
+        hub_connection.send("NotifyFrontendAboutManipulatedMesh", [data[0]["finalFilename"], frontend_id])
     except Exception as e:
         # informing frontend that there has been an error
-        hub_connection.send("NotifyFrontendAboutManipulationError", [connection_id])
+        hub_connection.send("ManipulationError", [frontend_id])
         print(e)
     
     # deleting temporary files
@@ -137,13 +143,20 @@ def handle_relief(data):
         # upload of manipulated file to server
         file = {'file': open(local_stl_path, 'rb')}
         r = requests.post(url=f'{server_adress}/upload', files=file)
+
+        # checking if file was succesfully uploaded
+        if r.status_code != 200:
+            hub_connection.send("ManipulationError", [frontend_id])
+            print("upload fehlgeschlagen")
+            return
+        
         print("relief hochgeladen")
 
         # informing frontend
         hub_connection.send("NotifyFrontendAboutManipulatedMesh", [f"{filename[:-4]}.stl", frontend_id])
     except Exception as e:
         print(e)
-        hub_connection.send("NotifyFrontendAboutManipulationError", [frontend_id])
+        hub_connection.send("ManipulationError", [frontend_id])
 
     os.remove(local_image_path)
     os.remove(local_stl_path)
@@ -156,7 +169,7 @@ def pretend_to_work(data):
     print("start working")
     time.sleep(10)
     print("working finished")
-    hub_connection.send("NotifyFrontendAboutManipulationError", [data[0]])
+    hub_connection.send("ManipulationError", [data[0]])
 
 def connect_with_retry():
     # creating signalR client and trying to connect to ASP.NET till connection is established

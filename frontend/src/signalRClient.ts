@@ -84,8 +84,8 @@ connection.on("MeshTransformed", (filename) => {
   })
 });
 
-connection.on("ScrapingFailed", () => {
- alert("Auskratzen Fehlgeschlagen \n \nBitte nutze eine gültige Datei und wähle korrekte Punkte aus")
+connection.on("TaskFailed", () => {
+ alert("Operation Fehlgeschlagen. Bitte erneut versuchen")
 });
 
 // debug event

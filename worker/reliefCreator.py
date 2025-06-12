@@ -3,8 +3,15 @@ import numpy as np
 import trimesh
 
 def create_relief(image_path, output_path, scale_x=1.0, scale_y=1.0, scale_z=1.0, invert=False):
-    # Load image and convert to grayscale
-    img = Image.open(image_path).convert('L')
+    # Load image and converting to grayscale
+    img = Image.open(image_path).convert('L') 
+
+    width, height = img.size
+
+    # halving the image resolution until it is hd or smaller
+    while width * height > 1280*720:
+        img = img.resize((width // 2, height // 2))
+        width, height = img.size
 
     # Create heightmap as 2D array
     heightmap = np.array(img, dtype=np.float32)
@@ -41,4 +48,4 @@ def create_relief(image_path, output_path, scale_x=1.0, scale_y=1.0, scale_z=1.0
     
     mesh = trimesh.Trimesh(vertices=vertices, faces=faces)
     print("Relief created")
-    mesh.export(output_path)
+    mesh.export(output_path, file_type="stl")

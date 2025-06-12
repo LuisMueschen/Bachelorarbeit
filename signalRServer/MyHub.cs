@@ -259,7 +259,7 @@ public class MyHub : Hub
         await Clients.Client(frontendClientId).SendAsync("MeshTransformed", filename);
     }
 
-    public async Task NotifyFrontendAboutManipulationError(string frontendClientId)
+    public async Task ManipulationError(string frontendClientId)
     // 
     // called by worker clients to inform a frontend client abount an error during a scraping or relief task
     // 
@@ -270,6 +270,6 @@ public class MyHub : Hub
         HandleWorkerReturn(Context.ConnectionId);
 
         // sending the message to the frontend
-        await Clients.Client(frontendClientId).SendAsync("ScrapingFailed");
+        await Clients.Client(frontendClientId).SendAsync("TaskFailed");
     }
 }
