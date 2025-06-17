@@ -207,6 +207,16 @@ export function createImageInterface(file: File){
   objectDiv.appendChild(scaleZLabel)
   objectDiv.appendChild(scaleZInput)
 
+  const baseThicknessLabel = document.createElement("label");
+  const baseThicknessInput = document.createElement("input");
+  baseThicknessInput.type = "number";
+  baseThicknessInput.value = "1.0"
+  baseThicknessInput.min = "0.1"
+  baseThicknessInput.step = "0.1"
+  baseThicknessLabel.textContent = "Modeldicke"
+  objectDiv.appendChild(baseThicknessLabel)
+  objectDiv.appendChild(baseThicknessInput)
+
   const invertLabel = document.createElement("label");
   const invertInput = document.createElement("input");
   invertInput.type = "checkbox"
@@ -222,6 +232,7 @@ export function createImageInterface(file: File){
       scaleX: Number(scaleXInput.value),
       scaleY: Number(scaleYInput.value),
       scaleZ: Number(scaleZInput.value),
+      baseThickness: Number(baseThicknessInput.value),
       invert: invertInput.checked
     })
   }

@@ -2,7 +2,7 @@ from PIL import Image
 import numpy as np
 import trimesh
 
-def create_relief(image_path, output_path, scale_x=1.0, scale_y=1.0, scale_z=1.0, invert=False, base_thickness=10.0):
+def create_relief(image_path, output_path, scale_x=1.0, scale_y=1.0, scale_z=1.0, invert=False, base_thickness=1.0):
     # Load image and converting to grayscale
     img = Image.open(image_path).convert('L') 
 
@@ -17,7 +17,7 @@ def create_relief(image_path, output_path, scale_x=1.0, scale_y=1.0, scale_z=1.0
     heightmap = np.array(img, dtype=np.float32)
     print("heightmap created")
 
-    if invert:
+    if not invert:
         heightmap = 255 - heightmap
 
     # Normalize heightmap values to range between 0 and scale_z

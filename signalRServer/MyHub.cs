@@ -199,6 +199,7 @@ public class MyHub : Hub
                 "scaleX: " + parameters.scaleX + "\n" +
                 "scaleY: " + parameters.scaleY + "\n" +
                 "scaleZ: " + parameters.scaleZ + "\n" +
+                "baseThickness: " + parameters.baseThickness + "\n" +
                 "invert: " + parameters.invert + "\n"
             );
 
@@ -212,6 +213,7 @@ public class MyHub : Hub
                 scaleX = parameters.scaleX,
                 scaleY = parameters.scaleY,
                 scaleZ = parameters.scaleZ,
+                baseThickness = parameters.baseThickness,
                 invert = parameters.invert,
                 connectionID = Context.ConnectionId
             });

@@ -119,10 +119,12 @@ def handle_relief(data):
     scale_x = float(data[0]['scaleX'])
     scale_y = float(data[0]['scaleY'])
     scale_z = float(data[0]['scaleZ'])
+    base_thickness = float(data[0]["baseThickness"])
     invert = bool(data[0]['invert'])
     print(scale_x)
     print(scale_y)
     print(scale_z)
+    print(base_thickness)
     print(invert)
 
     # changing file paths from parameters to fit local paths
@@ -138,7 +140,7 @@ def handle_relief(data):
 
     try:
         # creating reliev model
-        reliefCreator.create_relief(local_image_path, local_stl_path, scale_x, scale_y, scale_z, invert)
+        reliefCreator.create_relief(local_image_path, local_stl_path, scale_x, scale_y, scale_z, invert, base_thickness)
 
         # upload of manipulated file to server
         file = {'file': open(local_stl_path, 'rb')}

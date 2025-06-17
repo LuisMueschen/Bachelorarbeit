@@ -16,5 +16,6 @@ public class ReliefParameters
     public required float scaleX { get; set; }
     public required float scaleY { get; set; }
     public required float scaleZ { get; set; }
+    public required float baseThickness { get; set; }
     public required bool invert { get; set; }
 }
