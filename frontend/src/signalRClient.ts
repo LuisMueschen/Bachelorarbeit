@@ -76,11 +76,11 @@ connection.onreconnected(() => {
 })
 
 // downloading file from backend endpoint and importing it into the scene
-connection.on("MeshTransformed", (filename) => {
+connection.on("MeshTransformed", (filename, relief) => {
   console.log(`Mesh bearbeitet ${filename}`)
   downloadFileIntoScene(filename)
   .then((file) => {
-    addMeshToScene(file)
+    addMeshToScene(file, relief)
   })
 });
 

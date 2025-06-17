@@ -8,7 +8,8 @@ export function createMeshInterface(
   mesh: BABYLON.Mesh, 
   positionGizmo: BABYLON.PositionGizmo, 
   rotationGizmo: BABYLON.RotationGizmo,
-  meshMat: BABYLON.StandardMaterial
+  meshMat: BABYLON.StandardMaterial,
+  relief: boolean = false
 ): void {
 
   // parrent div containing the following objects
@@ -21,68 +22,93 @@ export function createMeshInterface(
   filenameLabel.className = "filenameLabel"
   objectDiv.appendChild(filenameLabel)
 
-  // parameter inputs
-  const supportDiameterLabel = document.createElement("label")
-  const supportDiameterInput = document.createElement("input")
-  supportDiameterInput.type = "number"
-  supportDiameterInput.value = "1.5"
-  supportDiameterInput.min = "0.1"
-  supportDiameterInput.id = "supportDiameterInput"
-  supportDiameterLabel.textContent = "Durchmesser der Stütze in mm"
-  objectDiv.appendChild(supportDiameterLabel)
-  objectDiv.appendChild(supportDiameterInput)
-
-  const edgeWidthLabel = document.createElement("label")
-  const edgeWidthInput = document.createElement("input")
-  edgeWidthInput.type = "number"
-  edgeWidthInput.value = "2"
-  edgeWidthInput.min = "0.1"
-  edgeWidthInput.id = "edgeWidthInput"
-  edgeWidthLabel.textContent = "Breite des Randes in mm"
-  objectDiv.appendChild(edgeWidthLabel)
-  objectDiv.appendChild(edgeWidthInput)
-
-  const transitionWidthLabel = document.createElement("label")
-  const transitionWidthInput = document.createElement("input")
-  transitionWidthInput.type = "number"
-  transitionWidthInput.value = "1"
-  transitionWidthInput.min = "0.1"
-  transitionWidthInput.id = "transitionWidthInput"
-  transitionWidthLabel.textContent = "Breite des Übergangs in mm"
-  objectDiv.appendChild(transitionWidthLabel)
-  objectDiv.appendChild(transitionWidthInput)
-
-  const targetWallThicknessLabel = document.createElement("label")
-  const targetWallThicknessInput = document.createElement("input")
-  targetWallThicknessInput.type = "number"
-  targetWallThicknessInput.value = "0.3"
-  targetWallThicknessInput.min = "0.1"
-  targetWallThicknessInput.id = "targetWallThicknessInput"
-  targetWallThicknessLabel.textContent = "Gewünschte Wandstärke in mm"
-  objectDiv.appendChild(targetWallThicknessLabel)
-  objectDiv.appendChild(targetWallThicknessInput)
-  
-  const targetTopThicknessLabel = document.createElement("label")
-  const targetTopThicknessInput = document.createElement("input")
-  targetTopThicknessInput.type = "number"
-  targetTopThicknessInput.value = "0.5"
-  targetTopThicknessInput.min = "0.1"
-  targetTopThicknessInput.id = "targetTopThicknessInput"
-  targetTopThicknessLabel.textContent = "Gewünschte Okklusalstärke in mm"
-  objectDiv.appendChild(targetTopThicknessLabel)
-  objectDiv.appendChild(targetTopThicknessInput)
-
-  const finalFilenameInput = document.createElement("input")
-  const finalFilenameLabel = document.createElement("label")
-  finalFilenameInput.id = "finalFilenameInput"
-  finalFilenameInput.value = file.name
-  finalFilenameLabel.textContent = "Finaler Dateiname"
-  objectDiv.appendChild(finalFilenameLabel)
-  objectDiv.appendChild(finalFilenameInput)
-
   const buttonDiv = document.createElement("div")
   buttonDiv.className = "buttonDiv"
-  objectDiv.appendChild(buttonDiv)
+
+  if(!relief){ 
+    // parameter inputs
+    const supportDiameterLabel = document.createElement("label")
+    const supportDiameterInput = document.createElement("input")
+    supportDiameterInput.type = "number"
+    supportDiameterInput.value = "1.5"
+    supportDiameterInput.min = "0.1"
+    supportDiameterInput.id = "supportDiameterInput"
+    supportDiameterLabel.textContent = "Durchmesser der Stütze in mm"
+    objectDiv.appendChild(supportDiameterLabel)
+    objectDiv.appendChild(supportDiameterInput)
+
+    const edgeWidthLabel = document.createElement("label")
+    const edgeWidthInput = document.createElement("input")
+    edgeWidthInput.type = "number"
+    edgeWidthInput.value = "2"
+    edgeWidthInput.min = "0.1"
+    edgeWidthInput.id = "edgeWidthInput"
+    edgeWidthLabel.textContent = "Breite des Randes in mm"
+    objectDiv.appendChild(edgeWidthLabel)
+    objectDiv.appendChild(edgeWidthInput)
+
+    const transitionWidthLabel = document.createElement("label")
+    const transitionWidthInput = document.createElement("input")
+    transitionWidthInput.type = "number"
+    transitionWidthInput.value = "1"
+    transitionWidthInput.min = "0.1"
+    transitionWidthInput.id = "transitionWidthInput"
+    transitionWidthLabel.textContent = "Breite des Übergangs in mm"
+    objectDiv.appendChild(transitionWidthLabel)
+    objectDiv.appendChild(transitionWidthInput)
+
+    const targetWallThicknessLabel = document.createElement("label")
+    const targetWallThicknessInput = document.createElement("input")
+    targetWallThicknessInput.type = "number"
+    targetWallThicknessInput.value = "0.3"
+    targetWallThicknessInput.min = "0.1"
+    targetWallThicknessInput.id = "targetWallThicknessInput"
+    targetWallThicknessLabel.textContent = "Gewünschte Wandstärke in mm"
+    objectDiv.appendChild(targetWallThicknessLabel)
+    objectDiv.appendChild(targetWallThicknessInput)
+    
+    const targetTopThicknessLabel = document.createElement("label")
+    const targetTopThicknessInput = document.createElement("input")
+    targetTopThicknessInput.type = "number"
+    targetTopThicknessInput.value = "0.5"
+    targetTopThicknessInput.min = "0.1"
+    targetTopThicknessInput.id = "targetTopThicknessInput"
+    targetTopThicknessLabel.textContent = "Gewünschte Okklusalstärke in mm"
+    objectDiv.appendChild(targetTopThicknessLabel)
+    objectDiv.appendChild(targetTopThicknessInput)
+
+    const finalFilenameInput = document.createElement("input")
+    const finalFilenameLabel = document.createElement("label")
+    finalFilenameInput.id = "finalFilenameInput"
+    finalFilenameInput.value = file.name
+    finalFilenameLabel.textContent = "Finaler Dateiname"
+    objectDiv.appendChild(finalFilenameLabel)
+    objectDiv.appendChild(finalFilenameInput)
+
+  
+    // button to start scraping
+    const scrapeButton = document.createElement('button');
+    scrapeButton.textContent = `auskratzen`;
+    scrapeButton.className = 'uploadBtn'; 
+    scrapeButton.onclick = () => {
+      if(finalFilenameInput.value !== file.name){
+        requestScraping(file, {
+        // necessary parameters for scraping
+        selections: selectedCoordinates[file.name],
+        supportDiameter: Number(supportDiameterInput.value),
+        edgeWidth:  Number(edgeWidthInput.value),
+        transitionWidth: Number(transitionWidthInput.value),
+        targetWallThickness: Number(targetWallThicknessInput.value),
+        targetTopThickness: Number(targetTopThicknessInput.value),
+        fileToUse: file.name,
+        finalFilename: finalFilenameInput.value
+        });
+      }else{
+        alert("Bitte benenne die Neue Datei anders als die Alte")
+      };
+    };
+    buttonDiv.appendChild(scrapeButton);
+  }
 
   // gizmo button
   const gizmoButton = document.createElement('button');
@@ -123,29 +149,6 @@ export function createMeshInterface(
   };
   buttonDiv.appendChild(deleteButton);
 
-  // button to start scraping
-  const scrapeButton = document.createElement('button');
-  scrapeButton.textContent = `auskratzen`;
-  scrapeButton.className = 'uploadBtn'; 
-  scrapeButton.onclick = () => {
-    if(finalFilenameInput.value !== file.name){
-      requestScraping(file, {
-      // necessary parameters for scraping
-      selections: selectedCoordinates[file.name],
-      supportDiameter: Number(supportDiameterInput.value),
-      edgeWidth:  Number(edgeWidthInput.value),
-      transitionWidth: Number(transitionWidthInput.value),
-      targetWallThickness: Number(targetWallThicknessInput.value),
-      targetTopThickness: Number(targetTopThicknessInput.value),
-      fileToUse: file.name,
-      finalFilename: finalFilenameInput.value
-      });
-    }else{
-      alert("Bitte benenne die Neue Datei anders als die Alte")
-    };
-  };
-  buttonDiv.appendChild(scrapeButton);
-
   // link to download file from backend endpoint
   const downloadButton = document.createElement('button');
   downloadButton.className = "downloadBtn"
@@ -163,6 +166,8 @@ export function createMeshInterface(
     meshMat.wireframe = !meshMat.wireframe;
   };
   buttonDiv.appendChild(wireframeButton);
+
+  objectDiv.appendChild(buttonDiv)
 }
 
 export function createImageInterface(file: File){
@@ -175,6 +180,9 @@ export function createImageInterface(file: File){
   filenameLabel.textContent = file.name;
   filenameLabel.className = "filenameLabel"
   objectDiv.appendChild(filenameLabel)
+
+  const buttonDiv = document.createElement("div")
+  buttonDiv.className = "buttonDiv"
 
   // Input elements for parameters for Relief creation
   const scaleXLabel = document.createElement("label");
@@ -213,7 +221,7 @@ export function createImageInterface(file: File){
   baseThicknessInput.value = "1.0"
   baseThicknessInput.min = "0.1"
   baseThicknessInput.step = "0.1"
-  baseThicknessLabel.textContent = "Modeldicke"
+  baseThicknessLabel.textContent = "Bodendicke"
   objectDiv.appendChild(baseThicknessLabel)
   objectDiv.appendChild(baseThicknessInput)
 
@@ -236,8 +244,8 @@ export function createImageInterface(file: File){
       invert: invertInput.checked
     })
   }
-  uploadButton.textContent = "hochladen"
-  objectDiv.appendChild(uploadButton)
+  uploadButton.textContent = "Relief erstellen"
+  buttonDiv.appendChild(uploadButton)
 
   // Button to remove this image interface
   const deleteButton = document.createElement('button');
@@ -247,7 +255,8 @@ export function createImageInterface(file: File){
   deleteButton.onclick = () => {
     document.getElementById('interface')?.removeChild(objectDiv);
   }
-  objectDiv.appendChild(deleteButton)
+  buttonDiv.appendChild(deleteButton)
 
+  objectDiv.appendChild(buttonDiv)
   document.getElementById('interface')?.appendChild(objectDiv)
 }

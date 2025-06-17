@@ -40,7 +40,7 @@ function createScene(engine: BABYLON.Engine){
 };
 
 // Importing mesh into scene from .stl file
-export function addMeshToScene(file: File): void{
+export function addMeshToScene(file: File, relief: boolean = false): void{
   const fileReader = new FileReader();
 
   fileReader.onload = (e) => {
@@ -64,8 +64,10 @@ export function addMeshToScene(file: File): void{
         const meshMat = new BABYLON.StandardMaterial("meshMat", scene)
         mesh.material = meshMat
         
-        createMeshInterface(file, mesh, positionGizmo, rotationGizmo, meshMat)
-        setupMeshInteraction(mesh as BABYLON.Mesh)
+        createMeshInterface(file, mesh, positionGizmo, rotationGizmo, meshMat, relief)
+        if(!relief){
+          setupMeshInteraction(mesh as BABYLON.Mesh)
+        }
       }, undefined, undefined, ".stl");
     }
   };

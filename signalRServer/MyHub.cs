@@ -247,7 +247,7 @@ public class MyHub : Hub
         }
     }
     
-    public async Task NotifyFrontendAboutManipulatedMesh(string filename, string frontendClientId)
+    public async Task NotifyFrontendAboutManipulatedMesh(string filename, string frontendClientId, bool relief=false)
     // 
     // called by worker clients to inform a frontend client about a finished scraping or relief task, so that the frontend can download the finished file
     // 
@@ -258,7 +258,7 @@ public class MyHub : Hub
         HandleWorkerReturn(Context.ConnectionId);
 
         // sending the name of the finished file to the frontend
-        await Clients.Client(frontendClientId).SendAsync("MeshTransformed", filename);
+        await Clients.Client(frontendClientId).SendAsync("MeshTransformed", filename, relief);
     }
 
     public async Task ManipulationError(string frontendClientId)

@@ -85,33 +85,32 @@ body {
   width: auto;
 }
 
-.objectDiv button {
+.buttonDiv button {
   margin: 5px;
   border-radius: 7px;
   border: 2px solid black;
   font-size: 11pt;
 }
 
-.objectDiv .deleteBtn {
+.buttonDiv .deleteBtn {
   background-color: rgb(185, 71, 71);
-  grid-column-start: 2;
-  grid-column-end: 3;
 }
 
-.objectDiv .uploadBtn {
+.buttonDiv .uploadBtn {
   background-color: rgb(117, 117, 117);
 }
 
-.objectDiv .downloadBtn {
+.buttonDiv .downloadBtn {
   background-color: rgb(98, 176, 221);
 }
 
-.objectDiv .downloadLink {
+.buttonDiv .downloadLink {
   text-decoration: none;
   color: black;
 }
 
 .objectDiv .buttonDiv {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   grid-template-columns: 2;
 }

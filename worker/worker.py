@@ -96,7 +96,7 @@ def handle_scraping(data):
             return
         
         # informing frontend that task is finished and file is available to download
-        hub_connection.send("NotifyFrontendAboutManipulatedMesh", [data[0]["finalFilename"], frontend_id])
+        hub_connection.send("NotifyFrontendAboutManipulatedMesh", [data[0]["finalFilename"], frontend_id, False])
     except Exception as e:
         # informing frontend that there has been an error
         hub_connection.send("ManipulationError", [frontend_id])
@@ -155,7 +155,7 @@ def handle_relief(data):
         print("relief hochgeladen")
 
         # informing frontend
-        hub_connection.send("NotifyFrontendAboutManipulatedMesh", [f"{filename[:-4]}.stl", frontend_id])
+        hub_connection.send("NotifyFrontendAboutManipulatedMesh", [f"{filename[:-4]}.stl", frontend_id, True])
     except Exception as e:
         print(e)
         hub_connection.send("ManipulationError", [frontend_id])
