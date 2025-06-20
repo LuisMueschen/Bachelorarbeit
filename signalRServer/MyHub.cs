@@ -16,10 +16,11 @@ public class MyHub : Hub
     // called when pressing w key inside console to print a list of all current workers and their task counts
     // 
     {
-        Console.WriteLine("Aktuelle Worker-Liste:");
+        Console.WriteLine("\n\n\nAktuelle Worker-Liste:");
         foreach (var worker in workerPool)
         {
             Console.WriteLine($"WorkerId: {worker.id}, Tasks: {worker.getTaskCount()}");
+            worker.printTasks();
         }
         if (workerPool.Count == 0)
         {
@@ -55,18 +56,14 @@ public class MyHub : Hub
         // getting worker with according ID
         Worker? worker = workerPool.FirstOrDefault(worker => worker.id == workerId);
 
-        // decreasing task count if > 0
-        if (worker != null && worker.getTaskCount() > 0)
-        {
-            worker.decreaseTaskCount();
-        }
+        worker?.taskDone();
     }
 
     public override async Task OnDisconnectedAsync(Exception? exception)
     // 
     // called if a client (both Frontend and Worker) disconects from the Server.
     // 
-    // Used to Remove worker from WorkerPool after worker disconects
+    // Used to Remove worker from WorkerPool after worker disconects and redistribute posibly unfinished tasks to other workers
     // 
     {
         string ConnectionId = Context.ConnectionId;
@@ -75,6 +72,23 @@ public class MyHub : Hub
 
         if (worker != null)
         {
+            // redistributing unfinished tasks to new workers
+            foreach (var taskParameter in worker.getTasks())
+            {
+                switch (taskParameter.type)
+                {
+                    case 0:
+                        await RequestNewDummyTask();
+                        break;
+                    case 1:
+                        await RequestScraping((ScrapingParameters)taskParameter);
+                        break;
+                    case 2:
+                        await RequestNewRelief((ReliefParameters)taskParameter);
+                        break;
+                }
+            }
+
             workerPool.Remove(worker);
             _logger.LogInformation(ConnectionId + " aus Workerliste entfernt");
         }
@@ -159,7 +173,7 @@ public class MyHub : Hub
             );
 
             // increasing task count of worker for load balancing
-            worker.increaseTaskCount();
+            worker.addTask(parameters);
 
             // sending NewScrapingTask message to worker with necessary arguments and connectionID of Frontend which initiated the task
             await Clients.Client(workerId).SendAsync("NewScrapingTask", new
@@ -204,7 +218,7 @@ public class MyHub : Hub
             );
 
             // increasing task count of worker for load balancing
-            worker.increaseTaskCount();
+            worker.addTask(parameters);
 
             // sending NewReliefTask message to worker with necessary arguments and connectionID of Frontend which initiated the task
             await Clients.Client(workerId).SendAsync("NewReliefTask", new
@@ -240,7 +254,7 @@ public class MyHub : Hub
             _logger.LogInformation("dummy task gestartet für " + workerId);
 
             // increasing task count of worker for load balancing
-            worker.increaseTaskCount();
+            worker.addTask(new TaskParameters());
             
             // sending NewDummyTask message to worker with connectionID of Frontend which initiated the task
             await Clients.Client(workerId).SendAsync("NewDummyTask", Context.ConnectionId);

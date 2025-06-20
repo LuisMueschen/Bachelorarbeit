@@ -1,24 +1,38 @@
 class Worker
 {
     public string id;
-    private int taskCount = 0;
+    private Queue<TaskParameters> activeTasks = new Queue<TaskParameters>();
 
     public Worker(string workerId)
     {
         id = workerId;
     }
+
+    public Queue<TaskParameters> getTasks()
+    {
+        return activeTasks;
+    }
+
     public int getTaskCount()
     {
-        return taskCount;
+        return activeTasks.Count;
     }
 
-    public void increaseTaskCount()
+    public void addTask(TaskParameters task)
     {
-        taskCount++;
+        activeTasks.Enqueue(task);
     }
 
-    public void decreaseTaskCount()
+    public void taskDone()
     {
-        taskCount--;
+        activeTasks.Dequeue();
+    }
+
+    public void printTasks()
+    {
+        foreach (var task in activeTasks)
+        {
+            Console.WriteLine(task);
+        }
     }
 }
