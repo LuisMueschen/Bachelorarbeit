@@ -6,10 +6,12 @@ using Microsoft.Extensions.Options;
 public class FileController : ControllerBase
 {
     private readonly FileCleanupConfig _fileCleanupConfig;
+    private readonly ILogger<FileController> _logger;
 
-    public FileController(IOptions<FileCleanupConfig> fileCleanupConfig)
+    public FileController(IOptions<FileCleanupConfig> fileCleanupConfig, ILogger<FileController> logger)
     {
         _fileCleanupConfig = fileCleanupConfig.Value;
+        _logger = logger;
     }
     
     [RequestSizeLimit(104857600)]
@@ -29,7 +31,7 @@ public class FileController : ControllerBase
             await file.CopyToAsync(stream);
         }
 
-        Console.WriteLine(file.FileName + " Hochgeladen");
+        _logger.LogInformation(file.FileName + " Hochgeladen");
 
         return Ok(new { filename = file.FileName });
     }
@@ -37,7 +39,6 @@ public class FileController : ControllerBase
     [HttpGet("/download/{filename}")]
     public IActionResult Download(string filename)
     {
-        Console.WriteLine("am anfang von download");
         string uploadPath = Path.Combine(Directory.GetCurrentDirectory(), _fileCleanupConfig.UploadPath);
         string filePath = Path.Combine(uploadPath, filename);
 
@@ -49,7 +50,7 @@ public class FileController : ControllerBase
         var content = System.IO.File.ReadAllBytes(filePath);
         var mimeType = "application/octet-stream";
 
-        Console.WriteLine(filename + " Runtergeladen");
+        _logger.LogInformation(filename + " Runtergeladen");
 
         return File(content, mimeType, filename);
     }
