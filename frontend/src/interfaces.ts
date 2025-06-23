@@ -1,5 +1,5 @@
 import * as BABYLON from 'babylonjs'
-import { serverAdress, uploadImage, requestScraping } from "./signalRClient";
+import { serverAdress, requestRelief, requestScraping } from "./signalRClient";
 import { selectedCoordinates, coordinateSpheres } from "./main";
 
 // creating the html interface to input parameters and interact with mesh
@@ -235,7 +235,7 @@ export function createImageInterface(file: File){
   // Button to start creation of Relief
   const uploadButton = document.createElement("button")
   uploadButton.onclick = () => {    
-    uploadImage(file, {
+    requestRelief(file, {
       filename: file.name,
       scaleX: Number(scaleXInput.value),
       scaleY: Number(scaleYInput.value),

@@ -52,7 +52,7 @@ export function requestScraping(file: File, parameters: Object){
   }
 }
 
-export function uploadImage(file: File, parameters: Object){
+export function requestRelief(file: File, parameters: Object){
   const formData = new FormData();
   formData.append('file', file)
 
