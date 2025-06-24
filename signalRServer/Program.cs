@@ -13,7 +13,9 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials()
-            .SetIsOriginAllowed(origin => true); // Für Entwicklung
+            .WithOrigins("http://localhost:8080");
+            // .SetIsOriginAllowed(origin => true); // Für Entwicklung
+
     });
 });
 

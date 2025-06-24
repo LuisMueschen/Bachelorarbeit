@@ -2,8 +2,9 @@ import { selectedCoordinates, coordinateSpheres, addMeshToScene } from "./main";
 import * as signalR from "@microsoft/signalr";
 
 // retrieving adress from config.json
-const config = await fetch("../cfg/config.json").then(res => res.json()).then(data => data)
-export const serverAdress = config["serverAdress"]
+// const config = await fetch("../../config.json").then(res => res.json()).then(data => data)
+// export const serverAdress = config["serverAdress"]
+export const serverAdress = "http://localhost:5500"
 
 // Connection to ASP.NET Server
 const connection = new signalR.HubConnectionBuilder()

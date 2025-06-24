@@ -1,17 +1,14 @@
 from signalrcore.hub_connection_builder import HubConnectionBuilder
 import time
 import os
-import threading
 import auskratzen
 import tempfile
 import reliefCreator
 import urllib
 import logging
 import requests
-import json
 
-with open("cfg/config.json", 'r') as config:
-    server_adress = json.load(config)["serverAdress"]
+server_adress = "http://asp.net:5500"
 
 # debug event
 def check_connection(args):
