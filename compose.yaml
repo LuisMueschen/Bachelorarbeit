@@ -1,12 +1,17 @@
 version: "1.27.0"
+
 services:
   frontend:
     build: ./frontend
     ports:
       - 8080:8080
+    volumes:
+      - ./config:/cfg:ro
   worker:
     build: ./worker
   asp.net:
     build: ./signalRServer
     ports:
       - 5500:5500
+    volumes:
+      - ./config:/app/cfg:ro

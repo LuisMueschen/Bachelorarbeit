@@ -1,6 +1,8 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import os
 import mimetypes
+import json
+from urllib.parse import urlparse
 
 class Serv(BaseHTTPRequestHandler):
 
@@ -40,5 +42,14 @@ class Serv(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(bytes(f'Error: {e}', 'utf-8'))
 
-httpd = HTTPServer(('0.0.0.0', 8080), Serv)
+with open("/cfg/config.json", 'r') as config_file:
+    address = json.load(config_file)["frontendAddress"]
+    parsed_address = urlparse(address)
+    host = parsed_address.hostname
+    port = parsed_address.port
+
+if host == "localhost":
+    host = "0.0.0.0"
+
+httpd = HTTPServer((host, port), Serv)
 httpd.serve_forever()

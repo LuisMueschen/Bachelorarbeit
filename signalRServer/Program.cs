@@ -4,7 +4,9 @@ builder.Configuration.AddJsonFile("cfg/config.json", optional: false, reloadOnCh
 
 builder.Services.Configure<FileCleanupConfig>(builder.Configuration.GetSection("fileCleanup"));
 
-// CORS hinzufügen
+var brokerAddress = builder.Configuration["brokerAddress"];
+var frontendAddress = builder.Configuration["frontendAddress"];
+
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
@@ -13,9 +15,7 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials()
-            .WithOrigins("http://localhost:8080");
-            // .SetIsOriginAllowed(origin => true); // Für Entwicklung
-
+            .WithOrigins(frontendAddress ?? "http://0.0.0.0"); // Fallback to localhost if frontendAddress is null
     });
 });
 
@@ -23,10 +23,9 @@ builder.Services.AddSignalR();
 builder.Services.AddControllers();
 builder.Services.AddHostedService<FileCleanupService>();
 
-var address = builder.Configuration["address"];
-if (address != null)
+if (brokerAddress != null)
 {
-    builder.WebHost.UseUrls(address);
+    builder.WebHost.UseUrls(brokerAddress);
 }
 
 var uploadPath = builder.Configuration.GetSection("fileCleanup")["uploadPath"];
