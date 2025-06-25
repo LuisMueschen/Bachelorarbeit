@@ -32,13 +32,13 @@ def create_relief(image_path, output_path, scale_x=1.0, scale_y=1.0, scale_z=1.0
     for y in range(h):
         for x in range(w):
             # z = height value at coordinate x, y
-            vertices.append((x * scale_x, (h-1-y) * scale_y, heightmap[y, x]))
+            vertices.append((x * scale_x, y * scale_y, heightmap[y, x]))
 
     # Iterating over heightmap to create ground vertices
     for y in range(h):
         for x in range(w):
             # z = height value at coordinate x, y
-            vertices.append((x * scale_x, (h-1-y) * scale_y, -base_thickness))
+            vertices.append((x * scale_x, y * scale_y, -base_thickness))
     print("vertices created")
 
     # Function to convert 2D array index to 1D index
@@ -51,31 +51,30 @@ def create_relief(image_path, output_path, scale_x=1.0, scale_y=1.0, scale_z=1.0
     # Iterate over pixels in image / coordinates in heightmap and create faces using idx function
     for y in range(h - 1):
         for x in range(w - 1):
-            # Two triangles per square - to avoid storing coordinates twice, only indices of the vertices array are stored in the faces array
-            faces.append([idx(x, y+1), idx(x+1, y), idx(x, y)])
-            faces.append([idx(x, y+1), idx(x+1, y+1), idx(x+1, y)])
+            faces.append([idx(x, y), idx(x+1, y), idx(x, y+1)])  # swapped
+            faces.append([idx(x+1, y), idx(x+1, y+1), idx(x, y+1)])  # swapped
 
     # iterating over coords to create ground faces
     for y in range(h - 1):
         for x in range(w - 1):
             # Two triangles per square - to avoid storing coordinates twice, only indices of the vertices array are stored in the faces array
-            faces.append([idx(x+1, y, False), idx(x, y+1, False), idx(x, y, False)])
-            faces.append([idx(x+1, y+1, False), idx(x, y+1, False), idx(x+1, y, False)])
+            faces.append([idx(x, y, False), idx(x, y+1, False), idx(x+1, y, False)])
+            faces.append([idx(x+1, y, False), idx(x, y+1, False), idx(x+1, y+1, False)])
 
     for x in range(w - 1):
         # Back
-        faces.append([idx(x, 0, True), idx(x + 1, 0, True), idx(x, 0, False)])
-        faces.append([idx(x + 1, 0, True), idx(x + 1, 0, False), idx(x, 0, False)])
+        faces.append([idx(x, 0, False), idx(x + 1, 0, True), idx(x, 0, True)])  # swapped
+        faces.append([idx(x, 0, False), idx(x + 1, 0, False), idx(x + 1, 0, True)])  # swapped
         # Front
-        faces.append([idx(x, h - 1, True), idx(x, h - 1, False), idx(x + 1, h - 1, True)])
-        faces.append([idx(x + 1, h - 1, True), idx(x, h - 1, False), idx(x + 1, h - 1, False)])
+        faces.append([idx(x + 1, h - 1, True), idx(x, h - 1, False), idx(x, h - 1, True)])  # swapped
+        faces.append([idx(x + 1, h - 1, False), idx(x, h - 1, False), idx(x + 1, h - 1, True)])  # swapped
     for y in range(h - 1):
         # Right
-        faces.append([idx(0, y, True), idx(0, y, False), idx(0, y + 1, True)])
-        faces.append([idx(0, y, False), idx(0, y + 1, False), idx(0, y + 1, True)])
+        faces.append([idx(0, y + 1, True), idx(0, y, False), idx(0, y, True)])  # swapped
+        faces.append([idx(0, y + 1, True), idx(0, y + 1, False), idx(0, y, False)])  # swapped
         # Left
-        faces.append([idx(w - 1, y, True), idx(w - 1, y + 1, True), idx(w - 1, y, False)])
-        faces.append([idx(w - 1, y + 1, True), idx(w - 1, y + 1, False), idx(w - 1, y, False)])
+        faces.append([idx(w - 1, y, False), idx(w - 1, y + 1, True), idx(w - 1, y, True)])  # swapped
+        faces.append([idx(w - 1, y, False), idx(w - 1, y + 1, False), idx(w - 1, y + 1, True)])  # swapped
     print("faces created")
     
     mesh = trimesh.Trimesh(vertices=vertices, faces=faces)
