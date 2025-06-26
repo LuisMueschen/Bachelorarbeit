@@ -44,7 +44,7 @@ var app = builder.Build();
 app.UseCors();
 
 // defining routes
-app.MapHub<MyHub>("/myhub");
+app.MapHub<TaskBroker>("/taskBroker");
 app.UseRouting();
 app.MapControllers();
 
@@ -56,7 +56,7 @@ _ = Task.Run(() =>
         var key = Console.ReadKey(true);
         if (key.Key == ConsoleKey.W)
         {
-            MyHub.PrintWorkers();
+            TaskBroker.PrintWorkers();
         }
     }
 });

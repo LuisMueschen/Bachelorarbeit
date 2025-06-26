@@ -14,7 +14,7 @@ public class FileController : ControllerBase
         _logger = logger;
     }
     
-    [RequestSizeLimit(104857600)]
+    [RequestSizeLimit(104857600)]/*100mb*/
     [HttpPost("/upload")]
     public async Task<IActionResult> Upload(IFormFile file)
     {

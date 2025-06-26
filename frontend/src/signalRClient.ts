@@ -8,7 +8,7 @@ export const serverAdress = "http://localhost:5500"
 
 // Connection to ASP.NET Server
 const connection = new signalR.HubConnectionBuilder()
-    .withUrl(`${serverAdress}/myhub`)
+    .withUrl(`${serverAdress}/taskBroker`)
     .withAutomaticReconnect({
       nextRetryDelayInMilliseconds: retryContext => {
         return Math.min(1000 * (retryContext.previousRetryCount + 1), 10000);

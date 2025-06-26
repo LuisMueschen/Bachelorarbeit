@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.SignalR;
 
-public class MyHub : Hub
+public class TaskBroker : Hub
 {
-    private readonly ILogger<MyHub> _logger;
+    private readonly ILogger<TaskBroker> _logger;
 
-    public MyHub(ILogger<MyHub> logger)
+    public TaskBroker(ILogger<TaskBroker> logger)
     {
         _logger = logger;
     }

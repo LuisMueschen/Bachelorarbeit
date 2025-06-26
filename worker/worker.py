@@ -15,11 +15,6 @@ def check_connection(args):
     print("message received: " + args[0])
     hub_connection.send("SendToFrontend", ["Hello Frontend!"])
 
-# deprecated
-# def start_new_scraping_task(data):
-#     task_thread = threading.Thread(target=handle_scraping, args=data)
-#     task_thread.start()
-
 # scraping event 
 def handle_scraping(data):
     # 
@@ -174,7 +169,7 @@ def connect_with_retry():
     # creating signalR client and trying to connect to ASP.NET till connection is established
     while True:
         try:
-            hub_connection = HubConnectionBuilder().with_url(f'{server_adress}/myhub').build()
+            hub_connection = HubConnectionBuilder().with_url(f'{server_adress}/taskBroker').build()
             hub_connection.on('CheckConnection', check_connection)
             hub_connection.on('NewScrapingTask', handle_scraping)
             hub_connection.on('NewReliefTask', handle_relief)
