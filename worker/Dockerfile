@@ -40,4 +40,4 @@ RUN pip install signalrcore numpy cmake stl pillow trimesh
 RUN mkdir worker
 WORKDIR /worker
 COPY . .
-CMD [ "python", "worker.py" ]
+CMD [ "python", "-u", "worker.py" ]
