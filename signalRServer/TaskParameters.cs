@@ -1,4 +1,4 @@
-public class TaskParameters
+public class TaskParameter
 {
     public virtual int type => 0;
 
@@ -8,7 +8,7 @@ public class TaskParameters
     }
 }
 
-public class ScrapingParameters : TaskParameters
+public class ScrapingParameters : TaskParameter
 {
     public override int type => 1;
     public required float[][] selections { get; set; }
@@ -35,7 +35,7 @@ public class ScrapingParameters : TaskParameters
     }
 }
 
-public class ReliefParameters : TaskParameters
+public class ReliefParameters : TaskParameter
 {
     public override int type => 2;
     public required string filename { get; set; }

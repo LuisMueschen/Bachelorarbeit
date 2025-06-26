@@ -1,14 +1,14 @@
 class Worker
 {
     public string id;
-    private Queue<TaskParameters> activeTasks = new Queue<TaskParameters>();
+    private Queue<TaskParameter> activeTasks = new Queue<TaskParameter>();
 
     public Worker(string workerId)
     {
         id = workerId;
     }
 
-    public Queue<TaskParameters> getTasks()
+    public Queue<TaskParameter> getTasks()
     {
         return activeTasks;
     }
@@ -18,7 +18,7 @@ class Worker
         return activeTasks.Count;
     }
 
-    public void addTask(TaskParameters task)
+    public void addTask(TaskParameter task)
     {
         activeTasks.Enqueue(task);
     }

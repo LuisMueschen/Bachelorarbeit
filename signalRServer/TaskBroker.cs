@@ -96,7 +96,7 @@ public class TaskBroker : Hub
         await base.OnDisconnectedAsync(exception);
     }
 
-    public Task Register(string groupName)
+    public void Register(string groupName)
     // 
     // called by every client immediatly after connecting
     // 
@@ -113,7 +113,6 @@ public class TaskBroker : Hub
         Groups.AddToGroupAsync(Context.ConnectionId, groupName);
 
         _logger.LogInformation($"{Context.ConnectionId} mit Gruppe {groupName} verbunden");
-        return Task.CompletedTask;
     }
 
     public async Task Ping()
@@ -254,7 +253,7 @@ public class TaskBroker : Hub
             _logger.LogInformation("dummy task gestartet für " + workerId);
 
             // increasing task count of worker for load balancing
-            worker.addTask(new TaskParameters());
+            worker.addTask(new TaskParameter());
             
             // sending NewDummyTask message to worker with connectionID of Frontend which initiated the task
             await Clients.Client(workerId).SendAsync("NewDummyTask", Context.ConnectionId);
