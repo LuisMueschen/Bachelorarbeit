@@ -1,20 +1,56 @@
-import { selectedCoordinates, coordinateSpheres, addMeshToScene } from "./main";
+import { selectedCoordinates, addMeshToScene } from "./main";
 import * as signalR from "@microsoft/signalr";
 
-// retrieving adress from config.json
-// const config = await fetch("../../config.json").then(res => res.json()).then(data => data)
-// export const serverAdress = config["serverAdress"]
-export const serverAdress = "http://localhost:5500"
+export var serverAdress: string;
+var connection: signalR.HubConnection
 
-// Connection to ASP.NET Server
-const connection = new signalR.HubConnectionBuilder()
-    .withUrl(`${serverAdress}/taskBroker`)
-    .withAutomaticReconnect({
-      nextRetryDelayInMilliseconds: retryContext => {
-        return Math.min(1000 * (retryContext.previousRetryCount + 1), 10000);
-      }
+export async function createAndStartConnection() {
+  const config = await fetch("cfg/config.json").then(res => res.json()).then(data => data)
+  serverAdress = config["brokerAddress"]
+  if(serverAdress.includes("://0.0.0.0:")){
+    serverAdress = serverAdress.replace("://0.0.0.0:", "://localhost:")
+  }
+  
+  // Connection to ASP.NET Server
+  connection = new signalR.HubConnectionBuilder()
+  .withUrl(`${serverAdress}/taskBroker`)
+  .withAutomaticReconnect({
+    nextRetryDelayInMilliseconds: retryContext => {
+      return Math.min(1000 * (retryContext.previousRetryCount + 1), 10000);
+    }
+  })
+  .build();
+
+  // starting connection to ASP.NET and immediatly registering for group "frontend"
+  connection.start().then(() => connection.invoke("register", "frontend"));
+
+  connection.onreconnecting(() => console.log("Verbindung verloren"))
+
+  connection.onreconnected(() => {
+    connection.invoke("register", "frontend")
+    console.log("Verbunden")
+  })
+
+  // downloading file from backend endpoint and importing it into the scene
+  connection.on("MeshTransformed", (filename, relief) => {
+    console.log(`Mesh bearbeitet ${filename}`)
+    downloadFileIntoScene(filename)
+    .then((file) => {
+      addMeshToScene(file, relief)
     })
-    .build();
+  });
+
+  connection.on("TaskFailed", () => {
+  alert("Operation Fehlgeschlagen. Bitte erneut versuchen")
+  });
+
+  // debug event
+  connection.on("ReceiveMessage", (data) => {
+    console.log(`message received: ${data}`);
+  });
+
+  setupDebugButtons();
+}
 
 // Downloading a File from Backend and returning a file object
 async function downloadFileIntoScene(filename: string): Promise<File>{
@@ -65,49 +101,22 @@ export function requestRelief(file: File, parameters: Object){
     connection.invoke("requestNewRelief", parameters)    
   })
 }
-
-// starting connection to ASP.NET and immediatly registering for group "frontend"
-connection.start().then(() => connection.invoke("register", "frontend"));
-
-connection.onreconnecting(() => console.log("Verbindung verloren"))
-
-connection.onreconnected(() => {
-  connection.invoke("register", "frontend")
-  console.log("Verbunden")
-})
-
-// downloading file from backend endpoint and importing it into the scene
-connection.on("MeshTransformed", (filename, relief) => {
-  console.log(`Mesh bearbeitet ${filename}`)
-  downloadFileIntoScene(filename)
-  .then((file) => {
-    addMeshToScene(file, relief)
-  })
-});
-
-connection.on("TaskFailed", () => {
- alert("Operation Fehlgeschlagen. Bitte erneut versuchen")
-});
-
-// debug event
-connection.on("ReceiveMessage", (data) => {
-  console.log(`message received: ${data}`);
-});
-
-// dummy task button
-const dummyTaskButton = document.createElement("button");
-dummyTaskButton.textContent = 'Dummy Task starten'
-dummyTaskButton.onclick = () => {
-  connection.invoke("RequestNewDummyTask")
-}
-document.getElementById("interface")?.appendChild(dummyTaskButton)
-
-// debug button
-const comCheckButton = document.getElementById("communicationCheckButton");
-if (comCheckButton) {
+function setupDebugButtons(){
+  // dummy task button
+  const dummyTaskButton = document.createElement("button");
+  dummyTaskButton.className = "debugButton";
+  dummyTaskButton.textContent = 'Dummy Task starten'
+  dummyTaskButton.onclick = () => {
+    connection.invoke("RequestNewDummyTask")
+  }
+  document.getElementById("interface")?.appendChild(dummyTaskButton)
+  
+  // debug button
+  const comCheckButton = document.createElement("button");
+  comCheckButton.className = "debugButton";
+  comCheckButton.textContent = "communication check";
   comCheckButton.onclick = () => {
     connection.invoke('SendToBackend', 'Hello Backend!');
-    console.log(selectedCoordinates);
-    console.log(coordinateSpheres);
   };
+  document.getElementById("interface")?.appendChild(comCheckButton)
 }

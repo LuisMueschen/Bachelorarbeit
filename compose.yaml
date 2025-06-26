@@ -1,12 +1,10 @@
-version: "1.27.0"
-
 services:
   frontend:
     build: ./frontend
     ports:
       - 8080:8080
     volumes:
-      - ./config:/cfg:ro
+      - ./config:/home/node/dist/cfg:ro
   worker:
     build: ./worker
   asp.net:

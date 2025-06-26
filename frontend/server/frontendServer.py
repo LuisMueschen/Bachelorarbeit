@@ -42,7 +42,7 @@ class Serv(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(bytes(f'Error: {e}', 'utf-8'))
 
-with open("/cfg/config.json", 'r') as config_file:
+with open("/home/node/dist/cfg/config.json", 'r') as config_file:
     address = json.load(config_file)["frontendAddress"]
     parsed_address = urlparse(address)
     host = parsed_address.hostname

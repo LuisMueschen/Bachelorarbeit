@@ -1,7 +1,7 @@
 import * as BABYLON from 'babylonjs';
 import { STLFileLoader } from 'babylonjs-loaders';
-// import * as processenv from 'processenv'
 import { createMeshInterface, createImageInterface } from './interfaces';
+import { createAndStartConnection } from './signalRClient';
 
 BABYLON.SceneLoader.RegisterPlugin(new STLFileLoader());
 
@@ -149,6 +149,8 @@ function deselectPoint(sphere: BABYLON.Mesh){
 }
 
  // rest //
+
+ createAndStartConnection();
 
 engine.runRenderLoop(() => {
   scene.render();

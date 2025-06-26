@@ -29,7 +29,7 @@ body {
   overflow-y: auto;
 }
 
-#communicationCheckButton{
+.debugButton{
   background-color: rgb(194, 194, 194);
   margin: 5px;
   border-radius: 7px;
