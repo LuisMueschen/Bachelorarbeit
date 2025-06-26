@@ -1,3 +1,4 @@
+import urllib.parse
 from signalrcore.hub_connection_builder import HubConnectionBuilder
 import time
 import os
@@ -7,8 +8,14 @@ import reliefCreator
 import urllib
 import logging
 import requests
+import json
 
-server_adress = "http://asp.net:5500"
+with open("/cfg/config.json", 'r') as config_file:
+    address = json.load(config_file)["brokerAddress"]
+    parsed_address = urllib.parse.urlparse(address)
+    port = parsed_address.port
+
+server_adress = f"http://asp.net:{port}"
 
 # debug event
 def check_connection(args):
