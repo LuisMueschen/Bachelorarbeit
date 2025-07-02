@@ -4,7 +4,7 @@ public class TaskParameter
 
     public override string ToString()
     {
-        return "Type: " + type;
+        return "Type: " + type + "\n";
     }
 }
 

@@ -28,6 +28,25 @@ public class TaskBroker : Hub
         }
     }
 
+    public static string GetWorkerListAsString()
+    // 
+    // Used to Create a List of all currently connected workers and their corresponding tasks
+    // 
+    {
+        string list = "Aktuell Verbundene Worker:\n";
+        if (workerPool.Count == 0)
+        {
+            list += "Keine Worker Registriert.";
+            return list;
+        }
+        foreach (var worker in workerPool)
+        {
+            list += $"WorkerId: {worker.id}, Tasks: {worker.getTaskCount()}\n";
+            list += worker.getTaskListAsString();
+        }
+        return list;
+    }
+
     private static Worker? GetWorker()
     // 
     // called to get the worker from the workerPool with the lowest current task count

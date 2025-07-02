@@ -35,4 +35,15 @@ class Worker
             Console.WriteLine(task);
         }
     }
+
+    public string getTaskListAsString()
+    {
+        string tasks = "";
+
+        foreach (var task in activeTasks)
+        {
+            tasks += task.ToString();
+        }
+        return tasks;
+    }
 }
