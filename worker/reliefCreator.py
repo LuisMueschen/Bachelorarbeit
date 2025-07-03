@@ -34,49 +34,66 @@ def create_relief(image_path, output_path, scale_x=1.0, scale_y=1.0, scale_z=1.0
             # z = height value at coordinate x, y
             vertices.append((x * scale_x, (h-1-y) * scale_y, heightmap[y, x]))
 
-    # Iterating over heightmap to create ground vertices
+    # creating lower vertices for ground and side faces
     for y in range(h):
-        for x in range(w):
-            # z = height value at coordinate x, y
-            vertices.append((x * scale_x, (h-1-y) * scale_y, -base_thickness))
+        # left
+        vertices.append((0, (h-1-y) * scale_y, -base_thickness))
+    for y in range(h):
+        # right
+        vertices.append(((w-1) * scale_x, (h-1-y) * scale_y, -base_thickness))
+    for x in range(w):
+        # front
+        vertices.append((x * scale_x, 0, -base_thickness))
+    for x in range(w):
+        # back
+        vertices.append((x * scale_x, (h-1) * scale_y, -base_thickness))
+         
     print("vertices created")
 
     # Function to convert 2D array index to 1D index
-    def idx(x, y, top=True): 
-        idx = y * w + x
-        if not top:
-            idx += w * h
-        return idx
+    def idx_relief(x, y):
+        return y*w + x
 
     # Iterate over pixels in image / coordinates in heightmap and create faces using idx function
-    for y in range(h - 1):
-        for x in range(w - 1):
-            faces.append([idx(x, y+1), idx(x+1, y), idx(x, y)])  # swapped
-            faces.append([idx(x, y+1), idx(x+1, y+1), idx(x+1, y)])  # swapped
-
-    # iterating over coords to create ground faces
-    for y in range(h - 1):
-        for x in range(w - 1):
-            # Two triangles per square - to avoid storing coordinates twice, only indices of the vertices array are stored in the faces array
-            faces.append([idx(x+1, y, False), idx(x, y+1, False), idx(x, y, False)])
-            faces.append([idx(x+1, y+1, False), idx(x, y+1, False), idx(x+1, y, False)])
-
-    for x in range(w - 1):
-        # Back
-        faces.append([idx(x, 0, True), idx(x + 1, 0, True), idx(x, 0, False)])
-        faces.append([idx(x + 1, 0, True), idx(x + 1, 0, False), idx(x, 0, False)])
-        # Front
-        faces.append([idx(x, h - 1, True), idx(x, h - 1, False), idx(x + 1, h - 1, True)])
-        faces.append([idx(x + 1, h - 1, True), idx(x, h - 1, False), idx(x + 1, h - 1, False)])
-    for y in range(h - 1):
-        # Right
-        faces.append([idx(0, y, True), idx(0, y, False), idx(0, y + 1, True)])
-        faces.append([idx(0, y, False), idx(0, y + 1, False), idx(0, y + 1, True)])
-        # Left
-        faces.append([idx(w - 1, y, True), idx(w - 1, y + 1, True), idx(w - 1, y, False)])
-        faces.append([idx(w - 1, y + 1, True), idx(w - 1, y + 1, False), idx(w - 1, y, False)])
-    print("faces created")
+    for y in range(h-1):
+        for x in range(w-1):
+            faces.append([idx_relief(x, y+1), idx_relief(x+1, y), idx_relief(x, y)])
+            faces.append([idx_relief(x, y+1), idx_relief(x+1, y+1), idx_relief(x+1, y)])
+        
+    def idx_left(y):
+        return h*w + y
     
+    def idx_right(y):
+        return h*w + h + y
+    
+    def idx_front(x):
+        return h*w + 2*h + x
+    
+    def idx_back(x):
+        return h*w + 2*h + w + x
+
+    # creating faces for sides
+    for y in range(h-1):
+        # # Left
+        faces.append([idx_left(y), idx_left(y+1), idx_relief(0, y+1)])
+        faces.append([idx_left(y), idx_relief(0, y+1), idx_relief(0, y)])
+        # Right
+        faces.append([idx_relief(w-1, y), idx_relief(w-1, y+1), idx_right(y+1)])
+        faces.append([idx_relief(w-1, y), idx_right(y+1), idx_right(y)])
+    for x in range(w-1):
+        # Front
+        faces.append([idx_relief(x, h-1), idx_front(x), idx_relief(x+1, h-1)])
+        faces.append([idx_front(x), idx_front(x+1), idx_relief(x+1, h-1)])
+        # Back
+        faces.append([idx_relief(x, 0), idx_relief(x+1, 0), idx_back(x)])
+        faces.append([idx_back(x+1), idx_back(x), idx_relief(x+1, 0)])
+
+    # Bodenfläche (ground face) korrekt schließen
+    faces.append([idx_left(0), idx_right(0), idx_right(h-1)])
+    faces.append([idx_left(0), idx_right(h-1), idx_left(h-1)])
+
+    print("faces created")
+
     mesh = trimesh.Trimesh(vertices=vertices, faces=faces)
     print("Relief created")
     mesh.export(output_path, file_type="stl")
